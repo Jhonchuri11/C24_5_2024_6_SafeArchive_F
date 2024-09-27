@@ -28,7 +28,7 @@ export default function ListDocumentos() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:8087/api/documentos/all');
+                const response = await fetch('http://localhost:8080/api/documentos');
                 const data = await response.json();
                 setDocumento(data);
                 console.log(data);
@@ -40,7 +40,6 @@ export default function ListDocumentos() {
         };
         fetchData();
     }, []);
-
 
 
     // Funcionalidad que permite la busqueda de documentos
@@ -66,7 +65,7 @@ export default function ListDocumentos() {
         setSearchResults(results);
     }
 
-
+/*
     // Funcionalida que permite eliminar un documento por su ID
     const handleDelete = async (id) => {
 
@@ -82,9 +81,9 @@ export default function ListDocumentos() {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    await axios.delete(`http://localhost:8087/api/documentos/delete/${id}`);
+                    await axios.delete(`http://localhost:8080/api/documentos/${id}`);
         
-                    const response = await axios.get('http://localhost:8087/api/documentos/all');
+                    const response = await axios.get('http://localhost:8080/api/documentos');
         
                     setSearchResults(response.data);
 
@@ -116,7 +115,7 @@ export default function ListDocumentos() {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    const response = await fetch(`http://localhost:8087/api/documentos/delete/${id}`, {
+                    const response = await fetch(`http://localhost:8080/api/documentos/${id}`, {
                         method: 'DELETE',
                     });
         
@@ -140,7 +139,7 @@ export default function ListDocumentos() {
             }
         })
     }
-
+*/
     const mostrarTabla = () => {
         console.log("Renderiazando tabla...");
         return (

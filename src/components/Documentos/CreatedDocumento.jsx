@@ -1,20 +1,15 @@
+import React, { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
-import React, { useEffect, useState } from "react"
-import {  Link, useParams, useNavigate } from "react-router-dom";
-import Swal from "sweetalert2";
+import Swal from 'sweetalert2';
+import "../../style/CreatedDocumento.css";
 
-export  default function UpdateDocumento() {
+export default function CreatedDocumento() {
 
     const navigate = useNavigate();
 
-    // Constante que recoge id del documento
-    const {id} = useParams();
-
-    const [documento, setDocumento] = useState([]);
-    const [loading, setLoading] = useState(true);
-
-
-    const [formData, setFormData] = useState({
+    // Variable que permite crear nuevo documento
+    const [formNewDocumento, setformNewDocumento] = useState({
         titulo: "",
         autores: "",
         resumen: "",
@@ -24,88 +19,72 @@ export  default function UpdateDocumento() {
         tema: ""
     });
 
-    // Funcionalidad que obtiene los datos del docuemnto por su ID
-    useEffect(() => {
-        // Consultamos y obtenemos dato del doc ID
-        axios.get(`http://localhost:8087/api/documentos/find/${id}`)
-        .then(response => {
-            setDocumento(response.data);
-            setFormData({
-                titulo: response.data.titulo,
-                autores: response.data.autores,
-                resumen: response.data.resumen,
-                anioPublicacion: response.data.anioPublicacion,
-                asesor: response.data.asesor,
-                categoria: response.data.categoria,
-                tema: response.data.tema
-        });
-            setLoading(false);
-        })
-        .catch(error => {
-            console.error('Error fetching documento:', error);
-            setLoading(false);
-        });
-    }, [id]);
-
     const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prevState => ({
-          ...prevState,
-          [name]: value
-        }));
-    };
-
-    const handleInsertData = (e) => {
-
+        setformNewDocumento({
+            ...formNewDocumento,
+            [e.target.name]: e.target.value,
+        });
+    }
+    // Funcionalidad que permite insertar nuevo documento
+    const handleInsertDocument = async (e) => {
         e.preventDefault();
 
-        Swal.fire({
-            title: 'Estás seguro de actualizar el documento?',
-            text: '!No podrás revertir esto!',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Sí, actualizar',
-            cancelButtonText: 'Cancelar'
-        }).then(async (result) => {
-            if (result.isConfirmed) {
+        if (!formNewDocumento.titulo || !formNewDocumento.autores || !formNewDocumento.resumen
+            || !formNewDocumento.anioPublicacion || !formNewDocumento.asesor || !formNewDocumento.categoria ||
+            !formNewDocumento.tema) {
+            alert("Completar los campos para el registro de documento");
+            return;
+        }
 
-                try {
-                    await axios.put(`http://localhost:8087/api/documentos/update/${id}`, formData)
+        try {
+            const DataToSend = {
+               ...formNewDocumento
+            };
 
-                    console.log("Documento actualizado");
+            const response = await axios.post("http://localhost:8080/api/documentos", DataToSend);
+            console.log("Producto creado", response.data);
 
-                    navigate('/listadoDocumento');
-                    Swal.fire(
-                        '!Actualizado!',
-                        'El documento ha sido actualizado correctamente.',
-                        'success'
-                    );
+            // Despues de la insercion se deja vacio los camppos
+            setformNewDocumento({
+                titulo: "",
+                autores: "",
+                resumen: "",
+                anioPublicacion: "",
+                asesor: "",
+                categoria: "",
+                tema: ""
+            });
+        
+            navigate('/listadoDocumento');
 
-                } catch (error) {
-
-                    console.log('Error updating documento:', error);
-                
-                    Swal.fire(
-                        '¡Error!',
-                        'Hubo un problema al actualizar el documento. Inténtalo de nuevo más tarde.',
-                       'error'
-                   );
+            Swal.fire({
+                position: "top-end",
+                icon: "success",
+                title: "Documento registrado correctamente!",
+                showConfirmButton: false,
+                timer: 1900,
+                customClass: {
+                    popup: 'swal-medium'
                 }
-            }
-        })
-    };
+            });
+        
+        } catch (error) {
+          console.error('Error creando producto:', error);
 
-    if (loading) {
-        return <div>Cargando...</div>;
+          if (error.response) {
+            console.log('Detalles del error:', error.response.data);
+          } else if (error.request) {
+            console.log('Error en la solicitud:', error.request);
+          } else {
+            console.log('Error general:', error.message);
+          }
+        }
     }
-
 
     return (
         <section>
         <div className="container p-3">
-        <h2>Edición de  documento</h2>
+        <h2>Creación de nuevo documento</h2>
         <hr/>
         <div className="login-pages bg-light">
             <div className="container p-4">
@@ -115,7 +94,7 @@ export  default function UpdateDocumento() {
                             <div className="row">
                                 <div className="col-md-12">
                                     <div className="form-left h-100 py-5 px-5">
-                                        <form onSubmit={handleInsertData} className="formulario">
+                                        <form onSubmit={handleInsertDocument} className="formulario">
                                             <div className="row g-4">
                                                 <div className="col-6">
                                                     <label>TITULO<span class="text-danger">*</span></label>
@@ -129,7 +108,7 @@ export  default function UpdateDocumento() {
                                                                     onChange={handleChange}
                                                                     id="titulo"
                                                                     name="titulo"
-                                                                    value={formData.titulo} 
+                                                                    value={formNewDocumento.titulo} 
                                                                     placeholder="Título"/>
                                                                     </div>
                                                             </div>
@@ -146,7 +125,7 @@ export  default function UpdateDocumento() {
                                                                     onChange={handleChange}
                                                                     id="autores"
                                                                     name="autores"
-                                                                    value={formData.autores}/>
+                                                                    value={formNewDocumento.autores}/>
                                                                     </div>
                                                             </div>
                                                             <div className="col-12">
@@ -161,7 +140,7 @@ export  default function UpdateDocumento() {
                                                                     onChange={handleChange}
                                                                     id="resumen"
                                                                     name="resumen"
-                                                                    value={formData.resumen}
+                                                                    value={formNewDocumento.resumen}
                                                                     ></textarea>
                                                                     </div>
                                                             </div>
@@ -178,13 +157,15 @@ export  default function UpdateDocumento() {
                                                                     onChange={handleChange}
                                                                     id="anioPublicacion"
                                                                     name="anioPublicacion"
-                                                                    value={formData.anioPublicacion}/>
+                                                                    value={formNewDocumento.anioPublicacion}/>
                                                                     </div>
                                                             </div>
                                                             <div className="col-6">
                                                                 <label>ASESOR<span className="text-danger">*</span></label>
                                                                     <div className="input-group">
-                                                                    <div className="input-group-text"><i className="bi bi-person-fill"></i></div>
+                                                                    <div className="input-group-text">
+                                                                        <i className="bi bi-person-fill"></i>
+                                                                    </div>
                                                                     <input 
                                                                     type="text" 
                                                                     className="form-control" 
@@ -192,7 +173,7 @@ export  default function UpdateDocumento() {
                                                                     onChange={handleChange}
                                                                     id="asesor"
                                                                     name="asesor"
-                                                                    value={formData.asesor}/>
+                                                                    value={formNewDocumento.asesor}/>
                                                                     </div>
                                                             </div>
                                                             <div className="col-6">
@@ -208,7 +189,7 @@ export  default function UpdateDocumento() {
                                                                     onChange={handleChange}
                                                                     id="categoria"
                                                                     name="categoria"
-                                                                    value={formData.categoria}/>
+                                                                    value={formNewDocumento.categoria}/>
                                                                     </div>
                                                             </div>
                                                             <div className="col-6">
@@ -224,7 +205,7 @@ export  default function UpdateDocumento() {
                                                                     onChange={handleChange}
                                                                     id="tema"
                                                                     name="tema"
-                                                                    value={formData.tema}/>
+                                                                    value={formNewDocumento.tema}/>
                                                                     </div>
                                                             </div>
                                                             <div class="col-sm-6">
@@ -234,7 +215,7 @@ export  default function UpdateDocumento() {
                                                                 </div>
                                                             </div>
                                                             <div class="col-12">
-                                                                <button class="btn btn-info px-4 float-end mt-4 me-2">Actualizar</button>
+                                                                <button class="btn btn-info px-4 float-end mt-4 me-2">Registrar</button>
                                                                 <Link to={'/listadoDocumento'} class="btn btn-success px-4 float-end mt-4 me-2">Volver</Link>
                                                             </div>
                                                         </div>

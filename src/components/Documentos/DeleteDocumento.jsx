@@ -25,7 +25,7 @@ export default function DeleteDocumento() {
     // Funcionalidad que obtiene los datos del docuemnto por su ID
     useEffect(() => {
         // Consultamos y obtenemos dato del doc ID
-        axios.get(`http://localhost:8087/api/documentos/find/${id}`)
+        axios.get(`http://localhost:8080/api/documentos/find/${id}`)
         .then(response => {
             setDocumento(response.data);
             setFormData({

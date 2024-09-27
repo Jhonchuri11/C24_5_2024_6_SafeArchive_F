@@ -1,6 +1,6 @@
-import '../style/Inicio.css';
+import '../../style/Inicio.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import doctesis from '../assets/images/doc_tesis.png';
+import doctesis from '../../assets/images/doc_tesis.png';
 import React, { useState } from "react";
 import { Link } from 'react-router-dom';
 

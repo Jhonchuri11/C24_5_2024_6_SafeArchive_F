@@ -1,13 +1,26 @@
 import React from "react";
-import logotec from '../assets/images/logo_tecsup-2.png';
-import profile from '../assets/images/profile.png';
-import Dropdown from "./Dropdown";
-import { useGoogleOAuth } from "@react-oauth/google";
+import logotec from '../../assets/images/Tec-update-01.png';
+import profile from '../../assets/images/profile.png';
+import Dropdown from "../Dropdown/Dropdown";
 
 export default function MainNav() {
 
-    const {user, loading, error, singIn, singOut } = useGoogleOAuth();
 
+    // Para mostrar la foto de perfil del user
+    /*
+    const [user, setuser] = useState('');
+
+    useEffect(() => {
+        axios.get('http://localhost:8080/user-info', {withCredentials: true})
+        .then(response => {
+            setuser(response.data);
+            console.log(response.data);
+        })
+        .catch(error => {
+            console.error('Error occured: ', error);
+        })
+    }, []);
+*/
     const toggleMenu = () => {
 
         var subMenu = document.getElementById("subMenu");
@@ -15,7 +28,7 @@ export default function MainNav() {
     }
     return (
         // Nav principal
-        <nav className="navbar navbar-expand-lg navbar-info bg-info">
+        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
             <div className="container">
                 <img src={logotec} width={"250px"}  class="navbar-brand"/>
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu">
@@ -29,8 +42,9 @@ export default function MainNav() {
                         </li>
                     </div>
                 </div>
+                
             </div>
-            
+        
             <div>
             {
                 toggleMenu && (

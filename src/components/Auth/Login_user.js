@@ -1,16 +1,22 @@
-import React, { useEffect, useState } from "react";
-import logo_student from "../assets/images/student-left-2.png";
-import logo_tecsup from "../assets/images/logo-right.png";
-import logo_google from "../assets/images/google-right.png";
-import "../style/Login_user.css";
+import React from "react";
+import logo_student from "../../assets/images/student-left-2.png";
+import logo_tecsup from "../../assets/images/tecsup_update.png";
+import logo_google from "../../assets/images/google-right.png";
+import "../../style/Login_user.css";
 import { useNavigate } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
+
+const apiURL = process.env.APP_API_GD_URL;
 
 export default function Login_user() {
 
     const navigate = useNavigate();
 
-   
+   // Creando la funcionalidad para el inicio de sesion con google
+   const gooogleLogin = () => {
+    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+   }
+
+    /*
     const handleLoginSuccess = (response) => {
 
         console.log(response);
@@ -20,6 +26,7 @@ export default function Login_user() {
     const handleLoginError = (error) => {
         console.log('Login error:', error);
     }
+    */
 
     // Funcionalidad para el inicio de sesion de google
     //const handleLoginSuccess = (credentialResponse) => {
@@ -62,20 +69,21 @@ export default function Login_user() {
                             </a>
                             */}
                             
-                            {/*
-                            <button className="btn btn-lg border btn-light fs-6 btn-login">
-                                <img src={logo_google} style={{ width: '20px' }} class="me-2"/><small>Continuar con Google</small>
+                           
+                            <button onClick={gooogleLogin} className="btn btn-lg border btn-light fs-6 btn-login">
+                                <img src={logo_google} style={ { width: '20px' }} className="me-2"/><small>Continuar con Google</small>
                             </button>
                             
-                             */}
                             
+                            {/*
                             <GoogleLogin
-                            clientId="592648497668-v8vor4i1ooauihmrl4nibrepp1cf16cu.apps.googleusercontent.com"
-                            buttonText="Iniciar sesión con Google"
                             onSuccess={handleLoginSuccess}
                             onFailure={handleLoginError}
                             cookiePolicy={'single_host_origin'}
                             />
+                            */}
+
+                           
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 import React from "react";
-import doctesis from '../assets/images/doc_tesis.png';
+import doctesis from '../../assets/images/doc_tesis.png';
 export default function Detalle() {
 
     return (
