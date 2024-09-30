@@ -16,7 +16,8 @@ import DeleteDocumento from './components/Documentos/DeleteDocumento';
 import OAuth2RedirectHandler from './components/Auth/OAuth2RedirectHandler';
 import AccessDenied from './components/Auth/AccessDenied';
 import ProtectedRoute from './components/ProtectedRoute';
-import Admin from './components/AuditLogs/Admin';
+import Admin from './components/AuditLogs/Admin'; 
+import StudentList from './components/AuditLogs/StudentList';
 
 // componenente Layout para paginas con nav, header y footer
 function MainLayout( { children }) {
@@ -103,16 +104,35 @@ export default function App() {
             </ProtectedRoute>
           }/>
           
-          <Route path='/access-denied' element={ <AccessDenied/> } />
+          <Route path='/access-denied' 
+          element={
+            <ProtectedRoute>
+            <MainLayout>
+             <AccessDenied/> 
+             </MainLayout>
+             </ProtectedRoute>
+             } />
+          
 
           <Route path='/admin/*'
            element=
            {
             <ProtectedRoute adminPage={true}>
+              <MainLayout>
                <Admin/>
+               </MainLayout>
             </ProtectedRoute>
            }/>
 
+        <Route
+          path='/dashboard/' 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+              <StudentList/>
+              </MainLayout>
+            </ProtectedRoute>
+          }/>  
         </Routes>
       </BrowserRouter>
     </>
