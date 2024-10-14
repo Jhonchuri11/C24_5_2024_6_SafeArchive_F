@@ -28,7 +28,7 @@ export default function ListDocumentos() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const response = await fetch('http://localhost:8080/api/documentos');
+                const response = await fetch('http://localhost:8081/api/documentos');
                 const data = await response.json();
                 setDocumento(data);
                 console.log(data);

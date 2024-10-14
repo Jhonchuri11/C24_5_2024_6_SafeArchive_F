@@ -1,151 +1,125 @@
-import React, { useState } from "react";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom"
+import React, { useState } from 'react';
 import api from "../../services/api";
-import Buttons from "../../utils/Buttons";
 
-const CreateDocumento = () => {
+const DocumentoUploadForm = () => {
+  // Estados para los datos del formulario
+  const [titulo, setTitulo] = useState('');
+  const [autores, setAutores] = useState('');
+  const [resumen, setResumen] = useState('');
+  const [anioPublicacion, setAnioPublicacion] = useState('');
+  const [asesor, setAsesor] = useState('');
+  const [categoria, setCategoria] = useState('');
+  const [tema, setTema] = useState('');
+  const [file, setFile] = useState(null); // Estado para el archivo PDF
 
-    const navigate = useNavigate();
+  // Manejar el archivo PDF
+  const handleFileChange = (event) => {
+    setFile(event.target.files[0]);
+  };
 
-    const [loading, setLoading] = useState("");
+  // Manejar el envío del formulario
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    
+    // Crear un objeto FormData para enviar los datos
+    const formData = new FormData();
+    formData.append('file', file); 
+    formData.append('titulo', titulo);
+    formData.append('autores', autores);
+    formData.append('resumen', resumen);
+    formData.append('anioPublicacion', anioPublicacion);
+    formData.append('asesor', asesor);
+    formData.append('categoria', categoria);
+    formData.append('tema', tema);
 
-    // Variable que permite crear nuevo documento
-    const [formNewDocumento, setformNewDocumento] = useState({
-        titulo: "",
-        autores: "",
-        resumen: "",
-        anioPublicacion: "",
-        asesor: "",
-        categoria: "",
-        tema: ""
-    });
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setformNewDocumento({
-            ...formNewDocumento,
-            [name]: value,
-        });
+    try {
+      // Enviar la solicitud al backend
+      const response = await api.post('/documentos/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+      console.log('Documento subido con éxito:', response.data);
+    } catch (error) {
+      console.error('Error al subir el documento:', error);
     }
+  };
 
-
-    // document handler
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        //const { titulo, autores, resumen, anioPublicacion, asesor, categoria, tema } = formNewDocumento;
-
-        if (!formNewDocumento.titulo || !formNewDocumento.autores || !formNewDocumento.resumen
-            || !formNewDocumento.anioPublicacion || !formNewDocumento.asesor || !formNewDocumento.categoria ||
-            !formNewDocumento.tema) {
-            return toast.error("Todos los campos son obligatorios");
-        }
-
-        // para el registro
-        try {
-            setLoading(true);
-            await api.post("/documentos", formNewDocumento);
-            toast.success("Documento creado correctamente");
-            navigate("/inicio");
-        } catch (error) {
-            toast.error("Error al crear documento");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    return (
-        <div className="container my-5">
-      <h1 className="text-center mb-4">Crear Nueva doc</h1>
-      <form onSubmit={handleSubmit}>
-        <div className="form-group mb-3">
-          <label htmlFor="titulo">Título</label>
+  return (
+    <div>
+      <h2>Subir Documento</h2>
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <div>
+          <label>Título:</label>
           <input
             type="text"
-            className="form-control"
-            id="titulo"
-            name="titulo"
-            value={formNewDocumento.titulo}
-            onChange={handleChange}
+            value={titulo}
+            onChange={(e) => setTitulo(e.target.value)}
+            required
           />
         </div>
-        <div className="form-group mb-3">
-          <label htmlFor="autores">Autores</label>
+        <div>
+          <label>Autores:</label>
           <input
             type="text"
-            className="form-control"
-            id="autores"
-            name="autores"
-            value={formNewDocumento.autores}
-            onChange={handleChange}
+            value={autores}
+            onChange={(e) => setAutores(e.target.value)}
+            required
           />
         </div>
-        <div className="form-group mb-3">
-          <label htmlFor="resumen">Resumen</label>
-          <input
-            type="text"
-            className="form-control"
-            id="resumen"
-            name="resumen"
-            value={formNewDocumento.resumen}
-            onChange={handleChange}
+        <div>
+          <label>Resumen:</label>
+          <textarea
+            value={resumen}
+            onChange={(e) => setResumen(e.target.value)}
+            required
           />
         </div>
-        <div className="form-group mb-3">
-          <label htmlFor="anioPublicacion">Año P</label>
+        <div>
+          <label>Año de Publicación:</label>
           <input
             type="number"
-            className="form-control"
-            id="anioPublicacion"
-            name="anioPublicacion"
-            value={formNewDocumento.anioPublicacion}
-            onChange={handleChange}
+            value={anioPublicacion}
+            onChange={(e) => setAnioPublicacion(e.target.value)}
+            required
           />
         </div>
-        <div className="form-group mb-3">
-          <label htmlFor="asesor">Asesor</label>
+        <div>
+          <label>Asesor:</label>
           <input
             type="text"
-            className="form-control"
-            id="asesor"
-            name="asesor"
-            value={formNewDocumento.asesor}
-            onChange={handleChange}
+            value={asesor}
+            onChange={(e) => setAsesor(e.target.value)}
+            required
           />
         </div>
-
-        <div className="form-group mb-3">
-          <label htmlFor="categoria">Categoria</label>
+        <div>
+          <label>Categoría:</label>
           <input
             type="text"
-            className="form-control"
-            id="categoria"
-            name="categoria"
-            value={formNewDocumento.categoria}
-            onChange={handleChange}
+            value={categoria}
+            onChange={(e) => setCategoria(e.target.value)}
+            required
           />
         </div>
-        <div className="form-group mb-3">
-          <label htmlFor="tema">Tema</label>
+        <div>
+          <label>Tema:</label>
           <input
             type="text"
-            className="form-control"
-            id="tema"
-            name="tema"
-            value={formNewDocumento.tema}
-            onChange={handleChange}
+            value={tema}
+            onChange={(e) => setTema(e.target.value)}
+            required
           />
         </div>
-        <Buttons
-        disabled={loading}
-        onclickhandler={handleSubmit}
-        className="btn btn-primary">
-            { loading ? <span>Loading...</span> : " Create documento"}
-        </Buttons>
-        </form>
+        
+        <div>
+          <label>Archivo PDF:</label>
+          <input type="file" onChange={handleFileChange} accept="application/pdf" required />
+        </div>
+        <button type="submit">Subir Documento</button>
+      </form>
     </div>
-    )
-}
+  );
+};
 
-export default CreateDocumento;
+export default DocumentoUploadForm;

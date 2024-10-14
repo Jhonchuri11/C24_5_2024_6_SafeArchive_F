@@ -1,0 +1,42 @@
+/* Archivo Sidebar.css */
+.sidebar-container {
+    position: fixed;
+    top: 74px;
+    min-height: calc(100vh - 74px);
+    max-height: calc(100vh - 74px);
+    left: 0;
+    z-index: 20;
+    padding: 10px;
+    transition: width 0.3s ease-in-out;
+  }
+  
+  .sidebar-container.expanded {
+    width: 13rem; /* Aproximadamente w-52 en Tailwind */
+  }
+  
+  .sidebar-container.collapsed {
+    width: 3rem; /* Aproximadamente w-12 en Tailwind */
+  }
+  
+  .hover-bg-btnColor:hover {
+    background-color: #4a90e2; /* Cambia a tu color de botón personalizado */
+  }
+  
+  .bg-headerColor {
+    background-color: #333; /* Ejemplo de color de fondo personalizado */
+  }
+  
+  .bg-btnColor {
+    background-color: #007bff; /* Color de fondo para los elementos activos */
+  }
+  
+  /* Transiciones para ocultar y mostrar el texto en la barra lateral */
+  .d-none {
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+  }
+  
+  .fw-semibold {
+    font-weight: 600;
+  }
+  

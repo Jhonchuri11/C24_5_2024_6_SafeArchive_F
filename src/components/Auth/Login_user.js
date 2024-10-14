@@ -13,7 +13,7 @@ export default function Login_user() {
 
    // Creando la funcionalidad para el inicio de sesion con google
    const gooogleLogin = () => {
-    window.location.href = 'http://localhost:8080/oauth2/authorization/google';
+    window.location.href = 'http://localhost:8081/oauth2/authorization/google';
    }
 
     /*

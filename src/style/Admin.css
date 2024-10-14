@@ -1,0 +1,18 @@
+/* Archivo Admin.css */
+.main-content {
+    transition: margin-left 0.3s ease-in-out;
+    min-height: calc(100vh - 74px);
+  }
+  
+  .sidebar-expanded {
+    margin-left: 13rem; /* Aproximadamente 52 en Tailwind */
+  }
+  
+  .sidebar-collapsed {
+    margin-left: 3rem; /* Aproximadamente 12 en Tailwind */
+  }
+  
+  .min-vh-100 {
+    min-height: 100vh;
+  }
+  

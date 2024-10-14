@@ -1,58 +1,100 @@
-import React from "react";
+import React from 'react';
 import logotec from '../../assets/images/Tec-update-01.png';
 import profile from '../../assets/images/profile.png';
-import Dropdown from "../Dropdown/Dropdown";
+import addDoc from '../../assets/images/addDoc.png';
+import dashboard from '../../assets/images/dashboard.png';
+import logout from '../../assets/images/logout.png';
+import '../../style/Dropdown.css';
+import { useNavigate, Link } from "react-router-dom";
+import { useMyContext } from "../../store/ContextApi";
 
 export default function MainNav() {
 
+    // navigation
+    const navigate = useNavigate();
 
-    // Para mostrar la foto de perfil del user
-    /*
-    const [user, setuser] = useState('');
+    // Access the states by using the useMyContext hook from the ContextProvider
+    const { setToken, setCurrentUser, isAdmin, setIsAdmin } = useMyContext();
 
-    useEffect(() => {
-        axios.get('http://localhost:8080/user-info', {withCredentials: true})
-        .then(response => {
-            setuser(response.data);
-            console.log(response.data);
-        })
-        .catch(error => {
-            console.error('Error occured: ', error);
-        })
-    }, []);
-*/
-    const toggleMenu = () => {
-
-        var subMenu = document.getElementById("subMenu");
-        subMenu.classList.toggle("open-menu");
+    const handleLogout = () => {
+        localStorage.removeItem("JWT_TOKEN"); // update to remove token from localStorage
+        localStorage.removeItem("USER"); // remove user details as well
+        localStorage.removeItem("CSRF_TOKEN");
+        localStorage.removeItem("IS_ADMIN");
+        setToken(null);
+        setCurrentUser(null);
+        setIsAdmin(false);
+        navigate("/");
     }
+
     return (
-        // Nav principal
-        <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+        <header className='sticky-top shadow-sm'>
+        <nav className="navbar  navbar-expand-lg navbar-dark bg-dark">
             <div className="container">
-                <img src={logotec} width={"250px"}  class="navbar-brand"/>
+                <Link to="/inicio">
+                <img src={logotec}  width={"250px"}  class="navbar-brand"/> 
+                </Link>
+               
                 <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu">
                     <span className="navbar-toggler-icon"></span>
                 </button>
-                <div className="collapse  navbar-collapse" id="navMneu">
-                    <div className="navbar-nav ms-auto">
-                        
-                        <li className="nav-item">
-                            <button  className="nav-link" onClick={toggleMenu}><img src={profile} width={"40px"} /></button>
-                        </li>
-                    </div>
-                </div>
                 
+                <div className="collapse  navbar-collapse" id="navmenu">
+                    <div className="navbar-nav ms-auto">
+                    
+                    <li className="nav-item dropdown">
+
+                    <button
+                        className="btn dropdown-toggle"
+                        id="navbarDropdown"
+                        data-bs-toggle="dropdown"
+                    
+                    >
+                        <img src={profile} width={"40px"} alt="Profile" />
+
+                    </button>
+
+                    <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                        <li>
+                            <Link  to="/MiPerfil" className="dropdown-item" >Usuario</Link>
+                        </li>
+                        <li>
+                            <Link to={'/documentos'} className="sub-menu-link">
+                                <img src={addDoc}/>
+                                <p>Documentos</p>
+                                <span>&gt;</span>
+                            </Link>
+                        </li>
+                        <li>
+                        {isAdmin && (
+                            <Link to={'/admin'} className="sub-menu-link">
+                            <img src={dashboard} alt="dashboard"/>
+                            <p>Dashboard</p>
+                            <span>&gt;</span>
+                            </Link>
+                        )}
+                        </li>
+                        <li>
+                            <hr className="dropdown-divider" />
+                        </li>
+                        <li>
+                            <button onClick={handleLogout} className="sub-menu-link">
+                                <img src={logout} alt="logout"/>
+                                <p>Logout</p>
+                                <span>&gt;</span>
+                            </button>
+                        </li>
+                    </ul>
+                </li>
+                </div>
             </div>
-        
-            <div>
-            {
-                toggleMenu && (
-                    <Dropdown/>  
-                )
-            } 
             </div>
         </nav>
-    
+        <div className="py-2 bg-info text-light ">
+            <div className='container'>
+            <p className="container m-0 text-white">Tesis y proyectos de Tecnología Digital</p>
+            </div>
+        </div>
+    </header>
     )
 }

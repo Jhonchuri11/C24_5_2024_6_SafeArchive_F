@@ -93,6 +93,14 @@ const StudentList = () => {
                         >
                             Eliminar
                         </button>
+
+                        <button 
+                            className="delete-button" 
+                            onClick={() => handleDelete(student.userId)}
+                        >
+                            Ver usuario
+                        </button>
+
                     </li>
                 ))}
             </ul>

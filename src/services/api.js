@@ -46,6 +46,7 @@ api.interceptors.request.use(
 );
 
 // User API functions
+
 export const fetchUsers = async () => {
     const response = await api.get('/users');
     return response.data;
@@ -61,15 +62,20 @@ export const updateUser = async (userId, userData) => {
     return response.data;
 };
 
+// Nueva función para obtener estudiantes
+export const fetchStudents = async () => {
+    const response = await api.get('/admin/users');
+    console.log(response);
+    return response.data;
+    
+};
+
+
 export const deleteUser = async (userId) => {
     await api.delete(`/users/${userId}`);
     return userId; // Retorna el ID para eliminarlo de la lista
 };
 
-// Nueva función para obtener estudiantes
-export const fetchStudents = async () => {
-    const response = await api.get('/users/students');
-    return response.data;
-};
+
 
 export default api;
