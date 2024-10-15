@@ -1,13 +1,41 @@
 import '../../style/Inicio.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import doctesis from '../../assets/images/doc_tesis.png';
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
+import api from '../../services/api';
+import toast from 'react-hot-toast';
 
 export default function Inicio() {
     // Definiendo variables para el funcionamiento de muestra de filtros
     const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
+    // documentos list
+    const [documentos, setDocumentos] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [errorr, setError] = useState(false);
+
+    useEffect(() => {
+        setLoading(true);
+        const fetchDocumentos = async () => {
+            try {
+                const response = await api.get("documentos/all");
+
+                // prueba de log
+                console.log(response.data);
+                const documentsData = Array.isArray(response.data) ? response.data : [];
+                setDocumentos(documentsData);
+            } catch (err) {
+                setError(err?.response?.data?.message);
+
+                toast.error("Error fetching documentos", err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDocumentos();
+    }, []);
 
     const cambioEstado = () => {
         setMostrarFiltros(!mostrarFiltros);
@@ -144,27 +172,39 @@ export default function Inicio() {
                 </div>
             </div>
             )}
+
+             {/* Resultados de listado para documentos */}
+
             <div className="container mt-3">
                 <p>Mostrando items 1-2 de 200</p>
+
+                { loading ? (
+                    <p>Cargando documentos</p>
+                ) : errorr ? (
+                    <p>{errorr}</p>
+                ) : (
                 <div className="row">
-                    <div className="col-md-3 mt-4">
-                        <img className="imgdocumento" src={doctesis} width={"240px"} height={"240px"}/>
+                    { documentos.map((documento, index) => (
+                    
+                    <div className="row" key={index}>
+                        <div className="col-md-3 mt-4">
+                            {/* Imagen de portada de documento */}
+                            <img 
+                            className="imgdocumento" 
+                            src={doctesis} 
+                            width={"240px"} 
+                            height={"240px"} 
+                            alt={documento}/>
+                        </div>
+                        <div className="col-md-9 mt-4">
+                            <Link to={`/detalle/${documento.id}`} className='documento'>{documento.titulo} </Link>
+                            <p>{documento.autores}</p>
+                            <p class="text-justify">{documento.resumen}</p>
+                        </div> 
                     </div>
-                    <div className="col-md-9 mt-4">
-                        <Link to='/detalle' className='documento'>La implementación de un proceso con estructura monitoria en el Perú como vía idónea para garantizar la autonomía, el derecho a la igualdad y no discriminación de las personas con discapacidad </Link>
-                        <p>Ancalle Gonzáles, Celene Lorenza; Bendezú Medina, Samuel Hernán (Pontificia Universidad Católica del Perú, 2017-02-15)</p>
-                        <p class="text-justify">José de Saramago, escritor luso, Premio Nobel de Literatura, en su célebre novela “Ensayo sobre la ceguera” (1995), nos narra la historia de una fulminante epidemia, que surge de manera inopinada en una ciudad sin nombre, ...</p>
-                    </div>
-                    <div className="col-md-3 mt-4">
-                        <img className="imgdocumento" src={doctesis} width={"240px"} height={"240px"}/>
-                    </div>
-                    <div className="col-md-9 mt-4">
-                    <Link to='/detalle' className='documento'>La implementación de un proceso con estructura monitoria en el Perú como vía idónea para garantizar la autonomía, el derecho a la igualdad y no discriminación de las personas con discapacidad </Link>
-                        <Link to='/detalle' className='documento'>Segundo</Link>
-                        <p>Ancalle Gonzáles, Celene Lorenza; Bendezú Medina, Samuel Hernán (Pontificia Universidad Católica del Perú, 2017-02-15)</p>
-                        <p class="text-justify">José de Saramago, escritor luso, Premio Nobel de Literatura, en su célebre novela “Ensayo sobre la ceguera” (1995), nos narra la historia de una fulminante epidemia, que surge de manera inopinada en una ciudad sin nombre, ...</p>
-                    </div>
+                    ))}
                 </div>
+                )}
                 <nav aria-label="Page navigation">
                     <ul class="pagination">
                         <li class="page-item"><a class="page-link" href="#">Anterior</a></li>

@@ -68,7 +68,7 @@ export default function App() {
             </MainLayout>
           </ProtectedRoute>} />
 
-          <Route path='/detalle' element={
+          <Route path='/detalle/:documentoId' element={
             <ProtectedRoute>
               <MainLayout>
               <Detalle/>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "../../style/CreatedDocumento.css";
 import {toast, Toaster} from "react-hot-toast";
@@ -11,6 +11,8 @@ export default function CreatedDocumento() {
 
     const [loading, setLoading] = useState(false);
 
+    const [error, setError] = useState(null);
+
     // Estados para los datos del formulario
     const [titulo, setTitulo] = useState('');
     const [autores, setAutores] = useState('');
@@ -20,6 +22,28 @@ export default function CreatedDocumento() {
     const [categoria, setCategoria] = useState('');
     const [tema, setTema] = useState('');
     const [file, setFile] = useState(null);
+
+    // categorias de documentos
+    const [categoriasList, setCategoriasList] = useState([]);
+
+    const fetchDocumento = useCallback(async () => {
+      try {
+        const response = await api.get("/categorias");
+
+        const documentList = Array.isArray (response.data) ? response.data : [];
+
+        setCategoriasList(documentList);;
+
+        console.log(documentList);
+        
+      } catch (err) {
+        setError(err?.response?.data?.message);
+      }
+    }, []);
+
+    useEffect(() => {
+      fetchDocumento();
+    }, [fetchDocumento])
 
     // Manejar el archivo PDF
     const handleFileChange = (event) => {
@@ -64,7 +88,13 @@ export default function CreatedDocumento() {
       } finally {
         setLoading(false);
       }
+
+      formData.forEach((value, key) => {
+        console.log(`${key}: ${value}`);
+      });
+      
     };
+    
 
     return (
         <section className="container p-3">
@@ -169,15 +199,24 @@ export default function CreatedDocumento() {
             <div className="input-group-text">
               <i className="bi bi-bookmark-star"></i>
             </div>
-            <input
-              type="text"
+            <select
               className="form-control"
-              placeholder="Categoria"
-              onChange={(e) => setCategoria(e.target.value)}
+              onChange={(e) => { setCategoria(e.target.value);
+                console.log('Categoria seleccionada:', e.target.value);
+               }
+              }
               id="categoria"
               name="categoria"
               value={categoria}
-            />
+            >
+              <option value="">Seleccione una categoria</option>
+              {categoriasList.map((cate) => (
+                <option key={cate.categoria_id} value={cate.categoria_id}>
+                  {cate.nombre_categoria}
+                </option>
+              ))}
+            </select>
+            
           </div>
         </div>
 
