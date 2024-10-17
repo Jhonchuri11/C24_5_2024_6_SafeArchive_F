@@ -5,27 +5,27 @@ import Inicio from './components/Home/Inicio';
 import MainNav from './components/NavBar/MainNav';
 
 import UserInformation from './components/User/UserInformation';
-
 import MainFooter from './components/Footer/MainFooter';
 import Detalle from './components/Documentos/Detalle';
 import Login_user from './components/Auth/Login_user';
 import ListDocumentos from './components/Documentos/ListDocumentos';
 import CreatedDocumento from './components/Documentos/CreatedDocumento';
-
 import UpdateDocumento from './components/Documentos/UpdateDocumento';
 import DeleteDocumento from './components/Documentos/DeleteDocumento';
 import OAuth2RedirectHandler from './components/Auth/OAuth2RedirectHandler';
 import AccessDenied from './components/Auth/AccessDenied';
 import ProtectedRoute from './components/ProtectedRoute';
 import Admin from './components/AuditLogs/Admin'; 
-
-
+import StudentDetail from './components/AuditLogs/StudentDetail';
 import StudentList from './components/AuditLogs/StudentList';
 import ContentDocument from './components/Documentos/ContentDocument';
 import { Toaster } from 'react-hot-toast';
 import NotFound from './components/NotFound';
 
-// componenente Layout para paginas con nav, header y footer
+import FormularioReporte from './components/Reportes/FormularioReporte';
+import ListaReportes from './components/Reportes/ListaReportes';
+
+
 function MainLayout( { children }) {
   return (
     <>
@@ -47,8 +47,7 @@ export default function App() {
     <>
       <BrowserRouter>
         <Routes>
-            {/* Rutas públicas */}
-
+          {/* Rutas públicas */}
           <Route path='/' element={<Login_user/>}/>
           <Route path='/oauth2/redirect' element={ <OAuth2RedirectHandler/> } />
 
@@ -87,8 +86,7 @@ export default function App() {
           }
           />
 
-          <Route
-          path='/editarDocumento/:id' element={
+          <Route path='/editarDocumento/:id' element={
             <ProtectedRoute>
               <MainLayout>
               <UpdateDocumento/>
@@ -96,9 +94,7 @@ export default function App() {
             </ProtectedRoute>
           }/>
           
-          <Route
-          path='/deleteDocumento/:id' 
-          element={
+          <Route path='/deleteDocumento/:id' element={
             <ProtectedRoute>
               <MainLayout>
               <DeleteDocumento/>
@@ -128,7 +124,6 @@ export default function App() {
           
           {/* Rutas user*/}
           <Route path='/MiPerfil'
-          
           element={
             <ProtectedRoute>
               <MainLayout>
@@ -138,8 +133,7 @@ export default function App() {
           }></Route>
 
           <Route path='/admin/*'
-           element=
-           {
+           element={
             <ProtectedRoute adminPage={true}>
               <MainLayout>
                <Admin/>
@@ -156,6 +150,33 @@ export default function App() {
               </MainLayout>
             </ProtectedRoute>
           }/>  
+
+          <Route path='/students/:userId' element={
+            <ProtectedRoute>
+              <MainLayout>
+                <StudentDetail />
+              </MainLayout>
+            </ProtectedRoute>
+          }/>
+
+          {/* Rutas para reportes */}
+          <Route path='/crear-reporte' 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <FormularioReporte />
+              </MainLayout>
+            </ProtectedRoute>
+          }/>
+
+          <Route path='/mis-reportes' 
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <ListaReportes userId={1} /> 
+              </MainLayout>
+            </ProtectedRoute>
+          }/>
 
           {/* Rutas no encontradas */}
           <Route path='*' element={
