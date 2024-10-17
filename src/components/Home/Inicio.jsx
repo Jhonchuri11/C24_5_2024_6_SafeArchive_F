@@ -1,12 +1,18 @@
 import '../../style/Inicio.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import doctesis from '../../assets/images/doc_tesis.png';
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
 export default function Inicio() {
+
+    // filtro basico para categoria
+    const [selectedCategoria, setSelectedCategoria] = useState('');
+
+    const [terminoBusqueda, setTerminoBusqueda] = useState('');
+
     // Definiendo variables para el funcionamiento de muestra de filtros
     const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
@@ -15,86 +21,101 @@ export default function Inicio() {
     const [loading, setLoading] = useState(false);
     const [errorr, setError] = useState(false);
 
-    useEffect(() => {
+    // estado que maneja los elementos dinamicos
+    const [elementos, setElementos] = useState([{}]);
+
+    // tipo de documento categorias
+    const [categorias, setCategorias] = useState([]);
+
+    const executeBusqueda = useCallback(async () => {
         setLoading(true);
-        const fetchDocumentos = async () => {
-            try {
-                const response = await api.get("documentos/all");
+        try {
+            const response = await api.get("/documentos/filtrar", {
+                params: {
+                    categoria: selectedCategoria,
+                    termino: terminoBusqueda,
+                }
+            });
 
-                // prueba de log
-                console.log(response.data);
-                const documentsData = Array.isArray(response.data) ? response.data : [];
-                setDocumentos(documentsData);
-            } catch (err) {
-                setError(err?.response?.data?.message);
+            const documentosData = Array.isArray(response.data) ? response.data : [];
 
-                toast.error("Error fetching documentos", err);
-            } finally {
-                setLoading(false);
-            }
-        };
+            setDocumentos(documentosData);
 
-        fetchDocumentos();
+            console.log(documentosData);
+
+        } catch (err) {
+            setError(err?.response?.data?.message);
+            toast.error("Error fetching documentos");
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedCategoria, terminoBusqueda])
+
+    const fetchCategorias = useCallback(async () => {
+        try {
+          const response = await api.get("/categorias");
+  
+          const documentList = Array.isArray(response.data) ? response.data : [];
+  
+          setCategorias(documentList);;
+  
+          console.log(documentList);
+          
+        } catch (err) {
+          setError(err?.response?.data?.message);
+        }
     }, []);
+
+    const fetchDocumentos = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await api.get("documentos/all");
+
+            // prueba de log
+            console.log(response.data);
+            const documentsData = Array.isArray(response.data) ? response.data : [];
+            setDocumentos(documentsData);
+        } catch (err) {
+            setError(err?.response?.data?.message);
+
+            toast.error("Error fetching documentos", err);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        fetchDocumentos();
+        fetchCategorias();
+    }, [fetchDocumentos, fetchCategorias]);
+
+    const handleCategoriaChange = (e) => {
+        setSelectedCategoria(e.target.value);
+    };
+
+    const handleBusquedaChange = (e) => {
+        setTerminoBusqueda(e.target.value);
+    }
 
     const cambioEstado = () => {
         setMostrarFiltros(!mostrarFiltros);
     };
 
-
     // Funcionalidad para agregar nuevo elemento
-    const agregarElemento = () => {
-        // Primero clonamos el primer elemento y agregamos lo nuevo como clon al contenedor
-        var contenedor = document.getElementById("contenedor");
-        var elementoOriginal = contenedor.querySelectorAll('.elemento');
-        var nuevoElemento = elementoOriginal[0].cloneNode(true);
-
-        // Limpiamos el input de nuevo elemento
-        var inputs = nuevoElemento.querySelectorAll('input');
-        inputs.forEach( input => {
-            input.value = '';
-        });
-
-        // Eliminamos el atributo id del nuevo elemento
-        nuevoElemento.removeAttribute('id');
-
-        // Agregamos el nuevo elemento
-        contenedor.appendChild(nuevoElemento);
+    const agregarElemento = (index) => {
+        const nuevoElementos = [...elementos];
+        nuevoElementos.splice(index + 1, 0, {}); // agrega un nuevo elemento despues del actual
+        setElementos(nuevoElementos);
     };
 
     // Funcionalidad para eliminar elemento
-    const eliminarElemento = () => {
-        var contenedor = document.getElementById("contenedor");
-        var elementos = contenedor.querySelectorAll('.elemento');
-
-        if (elementos.length > 0 ) {
-
-            if (elementos.length > 1 ) {
-                contenedor.removeChild(elementos[elementos.length - 1]);
-
-            } else {
-                var inputs = elementos[0].querySelectorAll('input');
-                inputs.forEach(input => {
-                input.value = '';
-            });
-            }
-        }
-    };
+    const eliminarElemento = (index) => {
+        const nuevoElementos = elementos.filter((_, i) => i !== index);
+        setElementos(nuevoElementos);
+    } 
 
     const restaurarElementos = () => {
-        var contenedor = document.getElementById("contenedor");
-        var elementos = contenedor.querySelectorAll('.elemento');
-    
-        // Eliminar todos los elementos, excepto el primero
-        for (let i = elementos.length - 1; i > 0; i--) {
-            contenedor.removeChild(elementos[i]);
-        }
-    
-        // Limpiar los inputs del primer elemento
-        var inputs = elementos[0].querySelectorAll('input');
-        inputs.forEach(input => {
-            input.value = '';
-        });
+        setElementos([{}]);
     };
 
     return (
@@ -106,19 +127,27 @@ export default function Inicio() {
             <div className="container">
                 <div className="row">
                     <div className="col-md-4">
-                        <select name="" id="" className="form-select" aria-label="Default select example">
-                            <option selected>Todos</option>
-                            <option value="1">1. Proyectos Integradores</option>
-                            <option value="2">2. Pretesis</option>
-                            <option value="3">3. Tesis</option>
+                        <select className="form-select" aria-label="Default select example"
+                        value={selectedCategoria}
+                        onChange={handleCategoriaChange}
+                        >
+                            <option value="" selected>Todos</option>
+                            {categorias.map((catego) => (
+                                <option key={catego.categoria_id} value={catego.categoria_id}>
+                                    {catego.nombre_categoria}
+                                </option>
+                            ))}
                         </select>
                     </div>
                     <div className="col-md-8 primero">
                         <div className="input-group mb-3">
-                            <input type="text" class="form-control controlador" placeholder="Ingresar su búsqueda"/>
-                            <a href="#" class="btn btn-outline-secondary" type="button">
+                            <input type="text" class="form-control controlador" placeholder="Ingresar su búsqueda"
+                            value={terminoBusqueda}
+                            onChange={handleBusquedaChange}/>
+
+                            <button class="btn btn-outline-secondary" type="button" onClick={executeBusqueda} >
                                 <i className="bi bi-search"></i>
-                            </a>
+                            </button>
                         </div>
                     </div>
                     <div className="col-md-2">
@@ -135,8 +164,10 @@ export default function Inicio() {
                     <p>Use los siguientes criterios para mejorar sus resultados</p>
                 </div>
                 <div id="contenedor">
+
+                    {elementos.map((elemento, index) => 
                     <div className="row elemento">
-                        <div className="col-md-3">
+                        <div className="col-md-3" key={index}>
                             <select class="form-select" aria-label="Default select example">
                                 <option defaultValue>Todos</option>
                                 <option value="1">Autor</option>
@@ -155,16 +186,17 @@ export default function Inicio() {
                         <div className="col-md-6">
                             <div className="input-group mb-3">
                                 <input type="text" class="form-control" placeholder="Ingresar su búsqueda" aria-label="Recipient's username" aria-describedby="button-addon2"/>
-                                <button class="btn btn-outline-secondary" onClick={agregarElemento}   type="button">
+                                <button class="btn btn-outline-secondary" onClick={() => agregarElemento(index)}   type="button">
                                     <i class="bi bi-plus-circle"></i>
                                 </button>
-                                <button class="btn btn-outline-secondary" onClick={eliminarElemento}  type="button">
+                                <button class="btn btn-outline-secondary" onClick={() => eliminarElemento(index)} disabled={elementos.length === 1}  type="button">
                                     <i class="bi bi-dash-circle"></i>
                                 </button>
                             </div>
                         </div>
                     </div>
-                  
+                )}
+
                 </div>
                 <div class="col-md-3">
                     <button className='btn btn-grey border' onClick={restaurarElementos}>Restaurar</button>

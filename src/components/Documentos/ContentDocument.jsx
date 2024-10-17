@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import './style/ContentDocument.css';
 import { Link } from "react-router-dom";
 import api from "../../services/api";
@@ -9,12 +9,13 @@ const ContentDocument = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
 
-    const fectchDocumentos = async () => {
+    const fectchDocumentos = useCallback(async () => {
         setLoading(true);
         try {
             const response = await api.get("/documentos");
             const documentData = Array.isArray(response.data) ? response.data : [];
             setDocumentos(documentData);
+            console.log(documentData);
         } catch (error) {
             setError(error.response.data.message);
             toast.error("Error fetching document for user");
@@ -22,7 +23,7 @@ const ContentDocument = () => {
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     useEffect(() => {
         fectchDocumentos();

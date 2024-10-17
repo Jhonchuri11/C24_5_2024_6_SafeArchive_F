@@ -1,10 +1,6 @@
 import React from 'react';
 import logotec from '../../assets/images/Tec-update-01.png';
 import profile from '../../assets/images/profile.png';
-import addDoc from '../../assets/images/addDoc.png';
-import dashboard from '../../assets/images/dashboard.png';
-import logout from '../../assets/images/logout.png';
-import '../../style/Dropdown.css';
 import { useNavigate, Link } from "react-router-dom";
 import { useMyContext } from "../../store/ContextApi";
 
@@ -28,9 +24,10 @@ export default function MainNav() {
     }
 
     return (
-        <header className='sticky-top shadow-sm'>
+        <header className="sticky-top shadow-sm">
         <nav className="navbar  navbar-expand-lg navbar-dark bg-dark">
             <div className="container">
+                
                 <Link to="/inicio">
                 <img src={logotec}  width={"250px"}  class="navbar-brand"/> 
                 </Link>
@@ -56,32 +53,27 @@ export default function MainNav() {
 
                     <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                         <li>
-                            <Link  to="/MiPerfil" className="dropdown-item" >Usuario</Link>
+                            <Link  to="/MiPerfil" className="dropdown-item" >Mi cuenta</Link>
                         </li>
                         <li>
-                            <Link to={'/documentos'} className="sub-menu-link">
-                                <img src={addDoc}/>
+                            <Link to={'/documentos'} className="dropdown-item">
                                 <p>Documentos</p>
-                                <span>&gt;</span>
                             </Link>
                         </li>
-                        <li>
+                       
                         {isAdmin && (
-                            <Link to={'/admin'} className="sub-menu-link">
-                            <img src={dashboard} alt="dashboard"/>
-                            <p>Dashboard</p>
-                            <span>&gt;</span>
+                        <li>
+                            <Link to={'/admin'} className="dropdown-item">
+                            <p>Panel de control</p>
                             </Link>
-                        )}
                         </li>
+                        )}
                         <li>
                             <hr className="dropdown-divider" />
                         </li>
                         <li>
-                            <button onClick={handleLogout} className="sub-menu-link">
-                                <img src={logout} alt="logout"/>
-                                <p>Logout</p>
-                                <span>&gt;</span>
+                            <button onClick={handleLogout} className="dropdown-item">
+                                <p>Cerrar sesiòn</p>
                             </button>
                         </li>
                     </ul>
