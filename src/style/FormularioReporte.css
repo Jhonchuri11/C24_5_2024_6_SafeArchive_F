@@ -1,0 +1,65 @@
+.formulario-reporte-container {
+    max-width: 600px; 
+    margin: 20px auto; 
+    padding: 20px; 
+    border: 1px solid #ccc; 
+    border-radius: 8px; 
+    background-color: #fff; 
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  h2 {
+    text-align: center; 
+    margin-bottom: 20px; 
+  }
+  
+  .formulario-reporte {
+    display: flex;
+    flex-direction: column; 
+  }
+  
+  .form-group-reporte {
+    margin-bottom: 15px; 
+  }
+  
+  label {
+    margin-bottom: 5px; 
+    font-weight: bold; 
+  }
+  
+  .form-input-reporte,
+  .form-textarea-reporte,
+  .form-select-reporte,
+  .form-file-reporte {
+    width: 100%; 
+    padding: 10px; 
+    border: 1px solid #ccc; 
+    border-radius: 4px; 
+    font-size: 16px;
+  }
+  
+  .form-textarea-reporte {
+    min-height: 100px; 
+  }
+  
+  .form-button-reporte {
+    background-color: #007bff; 
+    color: #fff; 
+    border: none; 
+    border-radius: 4px; 
+    padding: 10px 15px; 
+    font-size: 16px; 
+    cursor: pointer; 
+    transition: background-color 0.3s ease; 
+  }
+  
+  .form-button-reporte:hover {
+    background-color: #0056b3; 
+  }
+  
+  .form-message-reporte {
+    margin-top: 15px; 
+    text-align: center; 
+    color: #e34040; 
+  }
+  

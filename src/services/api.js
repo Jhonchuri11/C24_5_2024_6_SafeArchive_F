@@ -1,31 +1,28 @@
 // src/api.js
 import axios from "axios";
 
-console.log("API URL:", process.env.REACT_APP_API_URL);
-
 // Create an axios instance
 const api = axios.create({
-    baseURL: `${process.env.REACT_APP_API_URL}/api`,
+    baseURL: 'http://localhost:8081/api', // Asegúrate de que esta URL es correcta
     headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
     },
-    withCredentials: true,
 });
 
 // Add request interceptor to include JWT and CSRF tokens
 api.interceptors.request.use(
     async (config) => {
-        const token = localStorage.getItem("JWT_TOKEN");
+        const token = localStorage.getItem("JWT_TOKEN"); // Asegúrate de que este nombre coincida con el que usas para guardar el token
         if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+            config.headers.Authorization = `Bearer ${token}`; // Esto añade el token a las cabeceras
         }
 
         let csrfToken = localStorage.getItem("CSRF_TOKEN");
         if (!csrfToken) {
             try {
                 const response = await axios.get(
-                    `${process.env.REACT_APP_API_URL}/api/csrf-token`,
+                    `${process.env.REACT_APP_API_URL}/api/csrf-token`, // Asegúrate de que esta URL sea correcta
                     { withCredentials: true }
                 );
                 csrfToken = response.data.token;
@@ -36,7 +33,7 @@ api.interceptors.request.use(
         }
 
         if (csrfToken) {
-            config.headers["X-XSRF-TOKEN"] = csrfToken;
+            config.headers["X-XSRF-TOKEN"] = csrfToken; // Esto añade el token CSRF a las cabeceras
         }
         return config;
     },
@@ -46,7 +43,6 @@ api.interceptors.request.use(
 );
 
 // User API functions
-
 export const fetchUsers = async () => {
     const response = await api.get('/users');
     return response.data;
@@ -62,20 +58,29 @@ export const updateUser = async (userId, userData) => {
     return response.data;
 };
 
-// Nueva función para obtener estudiantes
+// Nueva función para obtener estudiantes por ID
+export const fetchStudentById = async (userId) => {
+    const response = await api.get(`/students/${userId}`); // Cambia la URL según tu API
+    return response.data; // Devuelve solo los datos del estudiante
+};
+
+
+export const changeUserRole = async (userId, roleData) => {
+    const response = await api.put(`/update-role?userId=${userId}&nombreRol=${roleData}`, {}); // Aquí pasas los datos
+    return response.data; // Devuelve los datos de la respuesta
+};
+
+// Nueva función para obtener todos los estudiantes
 export const fetchStudents = async () => {
     const response = await api.get('/admin/users');
     console.log(response);
-    return response.data;
-    
+    return response.data;    
 };
-
 
 export const deleteUser = async (userId) => {
     await api.delete(`/users/${userId}`);
     return userId; // Retorna el ID para eliminarlo de la lista
 };
-
 
 
 export default api;
