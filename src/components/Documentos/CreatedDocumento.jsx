@@ -98,7 +98,7 @@ export default function CreatedDocumento() {
 
     return (
         <section className="container p-3">
-  <h2>Creación de nuevo documento</h2>
+  <h2 className="text-start">Creación de nuevo documento</h2>
   <hr />
   <div className="bg-light p-4 shadow rounded">
     <form onSubmit={handleSubmit} 

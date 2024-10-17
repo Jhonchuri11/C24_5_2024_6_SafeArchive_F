@@ -121,7 +121,7 @@ export default function Inicio() {
     return (
         <section>
             <div className="container p-2">
-                <h2>Buscar</h2>
+                <h2 className='text-start'>Buscar</h2>
                 <hr/>
             </div>
             <div className="container">
