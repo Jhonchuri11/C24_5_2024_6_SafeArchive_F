@@ -60,7 +60,7 @@ const StudentList = () => {
 
     return (
         <div className="student-list-container">
-            <h1 className="student-list-title">Lista de Estudiantes</h1>
+            <h1 className="student-list-title">Lista de Usuarios</h1>
             <div className="student-search-bar">
                 <input
                     type="text"

@@ -39,6 +39,7 @@ export default function Sidebar() {
                 )}
             </div>
 
+            {/* Reports */}
             <div className="d-flex flex-column gap-3 mt-4">
                 <Tooltip title={`${openSidebar ? "" : "All Users"}`}>
                     <Link
@@ -64,29 +65,6 @@ export default function Sidebar() {
                         <LiaBlogSolid className="fs-4 me-2" />
                         <span className={`fw-semibold ${!openSidebar ? "d-none" : ""}`}>
                             Audit Logs
-                        </span>
-                    </Link>
-                </Tooltip>
-
-                <Tooltip title={`${openSidebar ? "" : "Reportes"}`}>
-                    <Link
-                        to="/admin/ver-reportes"
-                        className={`d-flex align-items-center text-white py-2 px-3 rounded ${
-                            pathName.startsWith("/admin/ver-reportes") ? "bg-btnColor" : "bg-transparent"
-                        } hover-bg-btnColor`}
-                    >
-                        <img 
-                            src={reportsIcon} 
-                            alt="Reportes Icon" 
-                            className="me-2" 
-                            style={{ 
-                                width: '20px', 
-                                height: '20px', 
-                                filter: 'invert(100%)' 
-                            }} 
-                        />
-                        <span className={`fw-semibold ${!openSidebar ? "d-none" : ""}`}>
-                            Reportes
                         </span>
                     </Link>
                 </Tooltip>
