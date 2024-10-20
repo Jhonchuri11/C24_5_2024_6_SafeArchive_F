@@ -26,6 +26,8 @@ export const  ContextProvider = ({ children }) => {
     // check the loggedin user is admin o not
     const [isAdmin, setIsAdmin] = useState(isADmin)
 
+    const [isAsesor, setIsAsesor] = useState(localStorage.getItem("IS_ASESOR") ? JSON.parse(localStorage.getItem("IS_ASESOR")) : false);
+
     // verificando el user
     const fetchUser = async () => {
         const user = JSON.parse(localStorage.getItem("USER"));
@@ -41,6 +43,11 @@ export const  ContextProvider = ({ children }) => {
                 } else {
                     localStorage.removeItem("IS_ADMIN");
                     setIsAdmin(false);
+                }
+                if (roles.includes("asesor")) {
+                    localStorage.setItem("IS_ASESOR", JSON.stringify(true));
+                } else {
+                    localStorage.removeItem("IS_ASESOR");
                 }
                 setCurrentUser(data);
             } catch (error) {
@@ -68,7 +75,9 @@ export const  ContextProvider = ({ children }) => {
             openSidebar,
             setOpenSidebar,
             isAdmin,
-            setIsAdmin
+            setIsAdmin,
+            isAsesor, 
+            setIsAsesor
         }}>
             { children }
         </ContextApi.Provider>

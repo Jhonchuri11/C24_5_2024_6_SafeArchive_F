@@ -9,14 +9,14 @@ export default function MainNav() {
     // navigation
     const navigate = useNavigate();
 
-    // Access the states by using the useMyContext hook from the ContextProvider
-    const { setToken, setCurrentUser, isAdmin, setIsAdmin } = useMyContext();
+    const { setToken, setCurrentUser, isAdmin, setIsAdmin, isAsesor } = useMyContext();
 
     const handleLogout = () => {
-        localStorage.removeItem("JWT_TOKEN"); // update to remove token from localStorage
-        localStorage.removeItem("USER"); // remove user details as well
+        localStorage.removeItem("JWT_TOKEN"); 
+        localStorage.removeItem("USER"); 
         localStorage.removeItem("CSRF_TOKEN");
         localStorage.removeItem("IS_ADMIN");
+        localStorage.removeItem("IS_ASESOR");
         setToken(null);
         setCurrentUser(null);
         setIsAdmin(false);
@@ -45,7 +45,7 @@ export default function MainNav() {
                                     data-bs-toggle="dropdown"
                                 >
                                     
-                                    <i class="icon_user text-white bi bi-list"></i>
+                                    <i className="icon_user text-white bi bi-list"></i>
                                 </button>
 
                                 <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
@@ -55,20 +55,19 @@ export default function MainNav() {
                                     </li>
 
                                     <li>
-                                        <Link to={'/documentos'} className="sub-menu-link dropdown-item">
-                                            <p>Documentos</p>
-                                        </Link>
+                                        <Link to="/inicio" className="sub-menu-link dropdown-item">Inicio</Link>
                                     </li>
 
-                                    {/* Opción de Hacer un Reporte para usuarios */}
-                                    {!isAdmin && (
+                                    {/* Opción de Documentos para Asesor */}
+                                    {isAsesor && (
                                         <li>
-                                            <Link to={'/crear-reporte'} className="sub-menu-link dropdown-item">
-                                                <p>Hacer un reporte</p>
+                                            <Link to={'/documentos'} className="sub-menu-link dropdown-item">
+                                                <p>Documentos</p>
                                             </Link>
                                         </li>
                                     )}
 
+                                    {/* Opción de Panel de Control para Administradores */}
                                     {isAdmin && (
                                         <li>
                                             <Link to={'/admin'} className="sub-menu-link  dropdown-item">
@@ -76,6 +75,7 @@ export default function MainNav() {
                                             </Link>
                                         </li>
                                     )}
+
                                     <li>
                                         <hr className="dropdown-divider" />
                                     </li>
