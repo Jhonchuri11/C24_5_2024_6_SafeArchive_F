@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import "../../style/ContentDocument.css";
 import {toast, Toaster} from "react-hot-toast";
 import api from "../../services/api";
+import Errors from "../Errors";
 
 
 export default function CreatedDocumento() {
@@ -12,7 +13,7 @@ export default function CreatedDocumento() {
 
     const [loading, setLoading] = useState(false);
 
-    const [error, setError] = useState(null);
+    const [error, setError] = useState(false);
 
     // Estados para los datos del formulario
     const [titulo, setTitulo] = useState('');
@@ -27,7 +28,8 @@ export default function CreatedDocumento() {
     // categorias de documentos
     const [categoriasList, setCategoriasList] = useState([]);
 
-    const fetchDocumento = useCallback(async () => {
+    const fetchCategoria = useCallback(async () => {
+      setLoading(true);
       try {
         const response = await api.get("/categorias");
 
@@ -35,16 +37,17 @@ export default function CreatedDocumento() {
 
         setCategoriasList(documentList);;
 
+        // eliminar
         console.log(documentList);
         
-      } catch (err) {
-        setError(err?.response?.data?.message);
+      } catch (error) {
+        setError(error.response.data.message);
+        console.log("Error fetching category", error);
+      } finally {
+        setLoading(false);
       }
     }, []);
 
-    useEffect(() => {
-      fetchDocumento();
-    }, [fetchDocumento])
 
     // Manejar el archivo PDF
     const handleFileChange = (event) => {
@@ -84,7 +87,8 @@ export default function CreatedDocumento() {
 
         console.log('Documento subido con éxito:', response.data);
       } catch (error) {
-        console.error('Error al subir el documento:', error);
+        setError(error.response.data.message);
+        console.error("Error al subir el documento:", error);
         toast.error("Error creating document");
       } finally {
         setLoading(false);
@@ -96,6 +100,14 @@ export default function CreatedDocumento() {
       
     };
     
+    useEffect(() => {
+      fetchCategoria();
+    }, [fetchCategoria])
+
+    // to show and erros
+    if (error) {
+      return <Errors message={error} />
+    }
 
     return (
         <section className="container p-3">
