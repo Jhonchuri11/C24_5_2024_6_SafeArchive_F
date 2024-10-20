@@ -1,6 +1,7 @@
 import '../../style/Inicio.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import doctesis from '../../assets/images/doc_tesis.png';
+import { SkeletonBlock, SkeletonImage, SkeletonText, }  from "skeleton-elements/react";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
@@ -13,6 +14,10 @@ export default function Inicio() {
 
     const [terminoBusqueda, setTerminoBusqueda] = useState('');
 
+    // filtros avanzados
+    const [filtrosAvanzados, setFiltrosAvanzados] = useState([{ campo: '', condicion: 'contiene', valor: '' }]);
+
+
     // Definiendo variables para el funcionamiento de muestra de filtros
     const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
@@ -20,6 +25,8 @@ export default function Inicio() {
     const [documentos, setDocumentos] = useState([]);
     const [loading, setLoading] = useState(false);
     const [errorr, setError] = useState(false);
+
+    const [effect, setEffect] = useState(null); // Efecto de skeleton
 
     // estado que maneja los elementos dinamicos
     const [elementos, setElementos] = useState([{}]);
@@ -30,18 +37,36 @@ export default function Inicio() {
     const executeBusqueda = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await api.get("/documentos/filtrar", {
-                params: {
-                    categoria: selectedCategoria,
-                    termino: terminoBusqueda,
-                }
-            });
+            const params = {
+                categoria: selectedCategoria || null,
+                termino: terminoBusqueda || null,
+                //filtrosAvanzados: filtrosAvanzados.filter(filtro => filtro.campo && filtro.valor)
+            }
+
+            const filtrosAvanzadosParams = filtrosAvanzados
+            .filter(filtro => filtro.campo && filtro.valor)
+            .flatMap((filtro, index) => [
+                `filtrosAvanzadosCampo${index}=${encodeURIComponent(filtro.campo)}`,
+                `filtrosAvanzadosCondicion${index}=${encodeURIComponent(filtro.condicion)}`,
+                `filtrosAvanzadosValor${index}=${encodeURIComponent(filtro.valor)}`
+            ])
+            .join('&');
+
+
+            const response = await api.get(`/documentos/filtrarAvanzado?${new URLSearchParams(params).toString()}&${filtrosAvanzadosParams}`);
 
             const documentosData = Array.isArray(response.data) ? response.data : [];
 
-            setDocumentos(documentosData);
+            //setDocumentos(documentosData);
 
-            console.log(documentosData);
+            setTimeout(() => {
+                setDocumentos(documentosData);
+                setLoading(false); 
+            }, 2000);
+
+            //console.log(response);
+
+            //console.log(documentosData);
 
         } catch (err) {
             setError(err?.response?.data?.message);
@@ -49,7 +74,14 @@ export default function Inicio() {
         } finally {
             setLoading(false);
         }
-    }, [selectedCategoria, terminoBusqueda])
+    }, [selectedCategoria, terminoBusqueda, filtrosAvanzados])
+
+    // funcion para manejar el cambio de filtro
+    const handleFiltroChange = (index, field, value) => {
+        const nuevosFiltros = [...filtrosAvanzados];
+        nuevosFiltros[index][field] = value;
+        setFiltrosAvanzados(nuevosFiltros);
+    }
 
     const fetchCategorias = useCallback(async () => {
         try {
@@ -108,14 +140,18 @@ export default function Inicio() {
         setElementos(nuevoElementos);
     };
 
+    const agregarFiltro = () => {
+        setFiltrosAvanzados([...filtrosAvanzados, { campo: '', condicion: 'contiene', valor: '' }]);
+    };
+
     // Funcionalidad para eliminar elemento
-    const eliminarElemento = (index) => {
-        const nuevoElementos = elementos.filter((_, i) => i !== index);
-        setElementos(nuevoElementos);
+    const eliminarFiltro = (index) => {
+        const nuevoFiltros = filtrosAvanzados.filter((_, i) => i !== index);
+        setFiltrosAvanzados(nuevoFiltros);
     } 
 
     const restaurarElementos = () => {
-        setElementos([{}]);
+        setFiltrosAvanzados([{}]);
     };
 
     return (
@@ -131,7 +167,7 @@ export default function Inicio() {
                         value={selectedCategoria}
                         onChange={handleCategoriaChange}
                         >
-                            <option value="" selected>Todos</option>
+                            <option value="" selected>Todo el repositorio</option>
                             {categorias.map((catego) => (
                                 <option key={catego.categoria_id} value={catego.categoria_id}>
                                     {catego.nombre_categoria}
@@ -145,9 +181,9 @@ export default function Inicio() {
                             value={terminoBusqueda}
                             onChange={handleBusquedaChange}/>
 
-                            <button class="btn btn-outline-secondary" type="button" onClick={executeBusqueda} >
+                            <Link class="btn btn-outline-secondary" type="button" onClick={executeBusqueda} >
                                 <i className="bi bi-search"></i>
-                            </button>
+                            </Link>
                         </div>
                     </div>
                     <div className="col-md-2">
@@ -160,36 +196,46 @@ export default function Inicio() {
             {mostrarFiltros && (
             <div className="container mt-3" >
                 <div className="row">
-                    <h2>Filtros</h2>
+                    <h2 className='text-start'>Filtros</h2>
                     <p>Use los siguientes criterios para mejorar sus resultados</p>
                 </div>
                 <div id="contenedor">
 
-                    {elementos.map((elemento, index) => 
+                    {filtrosAvanzados.map((filtro, index) => 
                     <div className="row elemento">
                         <div className="col-md-3" key={index}>
-                            <select class="form-select" aria-label="Default select example">
-                                <option defaultValue>Todos</option>
-                                <option value="1">Autor</option>
-                                <option value="2">Título</option>
-                                <option value="3">Asesor</option>
-                                <option value="4">Tema</option>
+                            <select class="form-select" aria-label="Campo" 
+                            value={filtro.campo}
+                            onChange={(e) => handleFiltroChange(index, 'campo', e.target.value )} >
+                                <option value="" defaultValue>Todos</option>
+                                <option value="autor">Autor</option>
+                                <option value="titulo">Título</option>
+                                <option value="asesor">Asesor</option>
+                                <option value="tema">Tema</option>
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <select class="form-select" aria-label="Default select example">
-                                <option selected>Todos</option>
-                                <option value="1">Contiene</option>
-                                <option value="2">No contiene</option>
+                            <select class="form-select" aria-label="Condicion"
+                            value={filtro.condicion}
+                            onChange={(e) => handleFiltroChange(index, 'condicion', e.target.value )}>
+                                <option value="contiene" selected>Contiene</option>
+                                <option value="no contiene">No contiene</option>
                             </select>
                         </div>
                         <div className="col-md-6">
                             <div className="input-group mb-3">
-                                <input type="text" class="form-control" placeholder="Ingresar su búsqueda" aria-label="Recipient's username" aria-describedby="button-addon2"/>
-                                <button class="btn btn-outline-secondary" onClick={() => agregarElemento(index)}   type="button">
+                                <input type="text" class="form-control" 
+                                placeholder="Ingresar su búsqueda" 
+                                value={filtro.valor}
+                                onChange={(e) => handleFiltroChange(index, 'valor', e.target.value )}
+                               />
+
+                                <button class="btn btn-outline-secondary" 
+                                onClick={agregarFiltro}   type="button">
                                     <i class="bi bi-plus-circle"></i>
                                 </button>
-                                <button class="btn btn-outline-secondary" onClick={() => eliminarElemento(index)} disabled={elementos.length === 1}  type="button">
+                                <button class="btn btn-outline-secondary" 
+                                onClick={() => eliminarFiltro(index)} disabled={filtrosAvanzados.length === 1}  type="button">
                                     <i class="bi bi-dash-circle"></i>
                                 </button>
                             </div>
@@ -200,7 +246,7 @@ export default function Inicio() {
                 </div>
                 <div class="col-md-3">
                     <button className='btn btn-grey border' onClick={restaurarElementos}>Restaurar</button>
-                    <button class="btn btn-grey border">Aplicar</button>
+                    <button class="btn btn-grey border" onClick={executeBusqueda}>Aplicar</button>
                 </div>
             </div>
             )}
@@ -210,10 +256,23 @@ export default function Inicio() {
             <div className="container mt-3">
                 <p>Mostrando items 1-2 de 200</p>
 
+                 {/* sKeleton*/}
+
                 { loading ? (
-                    <p>Cargando documentos</p>
+                    <div className='row'>
+                        {[...Array(4)].map((_, index) => {
+                            
+                        <div className='cold-md-12 mt-4' key={index}>
+                             <SkeletonBlock tag="p" width={300} height={20} effect={effect}/>
+                             <SkeletonBlock tag="p" width={200} height={20} effect={effect}/>
+                             <SkeletonBlock tag="p" width="100%" height={100} effect={effect}/>
+                         </div>
+                     
+                        })}
+                    </div>
+
                 ) : errorr ? (
-                    <p>{errorr}</p>
+                    toast.error("Failed documentos!")
                 ) : (
                 <div className="row">
                     { documentos.map((documento, index) => (

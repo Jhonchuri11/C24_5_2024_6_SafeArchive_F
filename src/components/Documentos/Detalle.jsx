@@ -76,11 +76,11 @@ export default function Detalle() {
                         <img className="imgdocumento" src={doctesis} width={"240px"} height={"240px"}/>
                         <p class="mt-4">Ver y descargar documento</p>
 
-                        <button onClick={handleDowload}  class="documento">Texto completo (3.44MB)</button>
+                        <button onClick={handleDowload}  className="btn btn-info documento">Descargar documento</button>
 
                         <p class="mt-2">Autores</p>
 
-                        <p>{documento.autores}<br/>{documento.autores}</p>
+                        <p>{documento.autores}<br/></p>
                     </div>
                     <div class="col-md-9 mt-4">
                         <h4>RESUMEN</h4>
@@ -90,11 +90,6 @@ export default function Detalle() {
                         <p>
                             {documento.tema}
                             <br/>
-                            Música en el arte-Perú-Lima
-                            <br/>
-                            Actuación-Rítmo
-                            <br/>
-                            Jazz
                         </p>
                     </div>
                     </div>

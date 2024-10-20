@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import "../../style/CreatedDocumento.css";
+//import "../../style/CreatedDocumento.css";
+import "../../style/ContentDocument.css";
 import {toast, Toaster} from "react-hot-toast";
 import api from "../../services/api";
 
@@ -98,9 +99,19 @@ export default function CreatedDocumento() {
 
     return (
         <section className="container p-3">
-  <h2 className="text-start">Creación de nuevo documento</h2>
+          <div className="row">
+                    <div className="col-12 col-md-12 col-sm-12 col-lg-12 col-xl-12">
+                        <nav aria-label="breadcrumb">
+                            <ol className="breadcrumb">
+                                <li className="breadcrumb-item"><Link to="/inicio" className="breadcrumb_inicio">Inicio</Link></li>
+                                <li className="breadcrumb-item" aria-current="page">Documentos</li>
+                                <li className="breadcrumb-item active" aria-current="page"> Registro de documento</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
   <hr />
-  <div className="bg-light p-4 shadow rounded">
+  <div className="card card-body bg-light p-4 shadow rounded">
     <form onSubmit={handleSubmit} 
     encType="multipart/form-data" className="formulario">
       <div className="row g-4">
@@ -245,10 +256,11 @@ export default function CreatedDocumento() {
 
         <div className="col-12">
           <button className="btn btn-info px-4 float-end mt-4 me-2">
-            { loading ? <sp>Loading...</sp> : " Create documento" }
+            { loading ? <sp>Loading...</sp> : " Crear documento" }
           </button>
       
-          <Link to={'/documentos'} className="btn btn-success px-4 float-end mt-4 me-2">Volver</Link>
+          <Link to={'/documentos'} className="btn btn-success px-4 float-end mt-4 me-2">Cancelar</Link>
+          
         </div>
       </div>
     </form>

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import './style/ContentDocument.css';
+import '../../style/ContentDocument.css';
 import { Link } from "react-router-dom";
 import api from "../../services/api";
 import toast from "react-hot-toast";
@@ -31,7 +31,7 @@ const ContentDocument = () => {
 
     return (
         <div>
-            <div className="container" style={{ maxWidth: 1240 }}>
+            <div className="container mt-4">
                 <div className="row">
                     <div className="col-12 col-md-12 col-sm-12 col-lg-12 col-xl-12">
                         <nav aria-label="breadcrumb">
@@ -45,7 +45,7 @@ const ContentDocument = () => {
                 </div>
             </div>
             <div className="content_documento container ">
-                <div className="row mb-3 mt-4">
+                <div className="row mb-3">
                     <div className="col-12">
                         <div className="box_block">
                             <div className="card-header box_header_1 py-2">
@@ -91,14 +91,13 @@ const ContentDocument = () => {
                                                     <td>{doc.anioPublicacion}</td>
                                                     <td>{doc.categoria ? doc.categoria.nombre_categoria : "N/A"}</td>
                                                     <td>{doc.tema}</td>
-                                                    <td>
-                                                        <Link to={`/documentos/${doc.id}`}>Ver Documento</Link>
-                                                    </td>
                                                     <td className="text-center py-2">
-                                                        <Link style={{ margin: "0 10px" }}>
+                                                        <Link to={`/documentos/${doc.id}`} style={{ margin: "0 10px" }}>
                                                             <i className="bi bi-eye-fill" style={{ fontSize: "24px" }}></i>
                                                         </Link>
-                                                        <Link style={{ margin: "0 10px" }}>
+                                                    </td>
+                                                    <td className="text-center py-2">
+                                                        <Link to={`/documentos/${doc.id}`} style={{ margin: "0 10px" }}>
                                                             <i className="bi bi-pen-fill" style={{ fontSize: "24px" }}></i>
                                                         </Link>
                                                     </td>

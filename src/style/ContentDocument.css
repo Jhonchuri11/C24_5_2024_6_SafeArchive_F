@@ -1,6 +1,3 @@
-.content_documento {
-    max-width: 1240px;
-}
 
 .mt-4, .my-4 {
     margin-top: 1.5rem !important;
@@ -27,6 +24,7 @@
 .card-header {
     border: none;
 }
+
 .card-header:first-child {
     border-radius: calc(.25rem - 1px) calc(.25rem - 1px) 0 0;
 }

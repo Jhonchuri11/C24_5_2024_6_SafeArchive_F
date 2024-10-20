@@ -1,6 +1,5 @@
 import React from 'react';
 import logotec from '../../assets/images/Tec-update-01.png';
-import profile from '../../assets/images/profile.png';
 import '../../style/Dropdown.css';
 import { useNavigate, Link } from "react-router-dom";
 import { useMyContext } from "../../store/ContextApi";
@@ -45,17 +44,18 @@ export default function MainNav() {
                                     id="navbarDropdown"
                                     data-bs-toggle="dropdown"
                                 >
-                                    <img src={profile} width={"40px"} alt="Profile" />
+                                    
+                                    <i class="icon_user text-white bi bi-list"></i>
                                 </button>
 
                                 <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                     
                                     <li>
-                                        <Link to="/MiPerfil" className="dropdown-item">Usuario</Link>
+                                        <Link to="/MiPerfil" className="sub-menu-link dropdown-item">Mi cuenta</Link>
                                     </li>
 
                                     <li>
-                                        <Link to={'/documentos'} className="dropdown-item">
+                                        <Link to={'/documentos'} className="sub-menu-link dropdown-item">
                                             <p>Documentos</p>
                                         </Link>
                                     </li>
@@ -63,7 +63,7 @@ export default function MainNav() {
                                     {/* Opción de Hacer un Reporte para usuarios */}
                                     {!isAdmin && (
                                         <li>
-                                            <Link to={'/crear-reporte'} className="dropdown-item">
+                                            <Link to={'/crear-reporte'} className="sub-menu-link dropdown-item">
                                                 <p>Hacer un reporte</p>
                                             </Link>
                                         </li>
@@ -71,15 +71,7 @@ export default function MainNav() {
 
                                     {isAdmin && (
                                         <li>
-                                            <Link to={'/ver-reportes'} className="dropdown-item">
-                                                <p>Ver reportes</p>
-                                            </Link>
-                                        </li>
-                                    )}
-
-                                    {isAdmin && (
-                                        <li>
-                                            <Link to={'/admin'} className="dropdown-item">
+                                            <Link to={'/admin'} className="sub-menu-link  dropdown-item">
                                                 <p>Panel de control</p>
                                             </Link>
                                         </li>
@@ -88,7 +80,7 @@ export default function MainNav() {
                                         <hr className="dropdown-divider" />
                                     </li>
                                     <li>
-                                        <button onClick={handleLogout} className="dropdown-item">
+                                        <button onClick={handleLogout} className="sub-menu-link dropdown-item">
                                             <p>Cerrar sesión</p>
                                         </button>
                                     </li>
