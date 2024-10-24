@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 //import "../../style/CreatedDocumento.css";
 import "../../style/ContentDocument.css";
-import {toast, Toaster} from "react-hot-toast";
+import {toast} from "react-hot-toast";
 import api from "../../services/api";
 import Errors from "../Errors";
 
@@ -42,7 +42,7 @@ export default function CreatedDocumento() {
         
       } catch (error) {
         setError(error.response.data.message);
-        console.log("Error fetching category", error);
+        console.log("Error fetching categories", error);
       } finally {
         setLoading(false);
       }
@@ -107,7 +107,7 @@ export default function CreatedDocumento() {
     // to show and erros
     if (error) {
       return <Errors message={error} />
-    }
+  }
 
     return (
         <section className="container p-3">
@@ -267,8 +267,9 @@ export default function CreatedDocumento() {
         </div>
 
         <div className="col-12">
-          <button className="btn btn-info px-4 float-end mt-4 me-2">
-            { loading ? <sp>Loading...</sp> : " Crear documento" }
+          <button
+          disabled={loading} className="btn btn-info px-4 float-end mt-4 me-2">
+            { loading ? <span>Loading...</span> : " Crear documento" }
           </button>
       
           <Link to={'/documentos'} className="btn btn-success px-4 float-end mt-4 me-2">Cancelar</Link>

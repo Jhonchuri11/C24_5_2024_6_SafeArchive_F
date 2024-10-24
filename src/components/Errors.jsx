@@ -5,7 +5,7 @@ import { FiAlertCircle } from "react-icons/fi";
 const Errors = ({ message }) => {
     const navigate = useNavigate();
     const onBackHandler = () => {
-        navigate(-1);
+        navigate('/');
     };
 
     return (

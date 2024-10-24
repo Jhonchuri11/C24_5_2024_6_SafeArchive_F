@@ -24,6 +24,7 @@ import NotFound from './components/NotFound';
 
 import FormularioReporte from './components/Reportes/FormularioReporte';
 import ListaReportes from './components/Reportes/ListaReportes';
+import DocumentoDetails from './components/Documentos/DocumentoDetails';
 
 
 function MainLayout( { children }) {
@@ -110,6 +111,16 @@ export default function App() {
                 <ContentDocument/>
               </MainLayout>
               </ProtectedRoute>
+          }
+          />
+
+          <Route path='/documentos/:id' 
+             element={
+            <ProtectedRoute>
+              <MainLayout>
+              <DocumentoDetails/>
+              </MainLayout>
+            </ProtectedRoute>
           }
           />
           

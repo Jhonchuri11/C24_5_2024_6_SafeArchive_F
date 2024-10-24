@@ -3,6 +3,11 @@ import '../../style/ContentDocument.css';
 import { Link } from "react-router-dom";
 import api from "../../services/api";
 import toast from "react-hot-toast";
+import Errors from "../Errors";
+import { IconButton } from "@mui/material";
+import { MdRemoveRedEye } from "react-icons/md";
+import { FaBan, FaEdit, FaFileAlt, FaTrash } from "react-icons/fa";
+import { FiDelete } from "react-icons/fi";
 
 const ContentDocument = () => {
     const [documentos, setDocumentos] = useState([]);
@@ -27,7 +32,12 @@ const ContentDocument = () => {
 
     useEffect(() => {
         fectchDocumentos();
-    }, []);
+    }, [fectchDocumentos]);
+
+    // to show and erros
+    if (error) {
+        return <Errors message={error} />
+    }
 
     return (
         <div>
@@ -93,12 +103,21 @@ const ContentDocument = () => {
                                                     <td>{doc.tema}</td>
                                                     <td className="text-center py-2">
                                                         <Link to={`/documentos/${doc.id}`} style={{ margin: "0 10px" }}>
-                                                            <i className="bi bi-eye-fill" style={{ fontSize: "24px" }}></i>
+                                                            <IconButton>
+                                                                <FaFileAlt style={{ fontSize: "24px" }}/>
+                                                            </IconButton>
                                                         </Link>
                                                     </td>
-                                                    <td className="text-center py-2">
+                                                    <td className="text-center">
                                                         <Link to={`/documentos/${doc.id}`} style={{ margin: "0 10px" }}>
-                                                            <i className="bi bi-pen-fill" style={{ fontSize: "24px" }}></i>
+                                                            <IconButton>
+                                                              <FaTrash style={{ fontSize: "24px" }}/>
+                                                            </IconButton>
+                                                        </Link>
+                                                        <Link to={`/documentos/${doc.id}`}>
+                                                            <IconButton>
+                                                                <FaEdit />
+                                                            </IconButton>
                                                         </Link>
                                                     </td>
                                                 </tr>

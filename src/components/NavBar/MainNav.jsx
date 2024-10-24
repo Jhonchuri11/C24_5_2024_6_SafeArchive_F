@@ -9,7 +9,7 @@ export default function MainNav() {
     // navigation
     const navigate = useNavigate();
 
-    const { setToken, setCurrentUser, isAdmin, setIsAdmin, isAsesor } = useMyContext();
+    const { setToken, setCurrentUser, isAdmin, setIsAdmin, isAsesor, setIsAsesor } = useMyContext();
 
     const handleLogout = () => {
         localStorage.removeItem("JWT_TOKEN"); 
@@ -20,6 +20,7 @@ export default function MainNav() {
         setToken(null);
         setCurrentUser(null);
         setIsAdmin(false);
+        setIsAsesor(false);
         navigate("/");
     }
 
