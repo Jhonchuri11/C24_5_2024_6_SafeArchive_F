@@ -79,7 +79,7 @@ export default function App() {
 
           <Route path='/createDocumento' 
           element={
-            <ProtectedRoute>
+            <ProtectedRoute asesorPage={true}>
               <MainLayout>
               <CreatedDocumento/>
               </MainLayout>
@@ -104,15 +104,7 @@ export default function App() {
           }/>
 
           {/* Rutas protegidas */}
-          <Route path='/documentos'
-          element = {
-            <ProtectedRoute>
-              <MainLayout>
-                <ContentDocument/>
-              </MainLayout>
-              </ProtectedRoute>
-          }
-          />
+          
 
           <Route path='/documentos/:id' 
              element={
@@ -143,6 +135,16 @@ export default function App() {
             </ProtectedRoute>
           }></Route>
 
+          <Route path='/documentos'
+               element = {
+              <ProtectedRoute asesorPage={true}>
+              <MainLayout>
+                <ContentDocument/>
+              </MainLayout>
+              </ProtectedRoute>
+          }
+          />
+
           <Route path='/admin/*'
            element={
             <ProtectedRoute adminPage={true}>
@@ -152,20 +154,12 @@ export default function App() {
             </ProtectedRoute>
            }/>
 
-        <Route
-          path='/dashboard/'
-          element={
-            <ProtectedRoute>
-              <MainLayout>
-              <StudentList/>
-              </MainLayout>
-            </ProtectedRoute>
-          }/>  
+         
 
           <Route path='/students/:userId' element={
             <ProtectedRoute>
               <MainLayout>
-                <StudentDetail />
+                <StudentDetail/>
               </MainLayout>
             </ProtectedRoute>
           }/>
