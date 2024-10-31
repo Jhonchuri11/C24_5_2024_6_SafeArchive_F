@@ -5,10 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useMyContext } from "../../store/ContextApi";
 
 export default function MainNav() {
-
-    // navigation
     const navigate = useNavigate();
-
     const { setToken, setCurrentUser, isAdmin, setIsAdmin, isAsesor, setIsAsesor } = useMyContext();
 
     const handleLogout = () => {
@@ -29,37 +26,28 @@ export default function MainNav() {
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
                 <div className="container">
                     <Link to="/inicio">
-                        <img src={logotec} width={"250px"} className="navbar-brand" />
+                        <img src={logotec} width={"250px"} className="navbar-brand" alt="Logo" />
                     </Link>
-                   
                     <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navmenu">
                         <span className="navbar-toggler-icon"></span>
                     </button>
-                    
                     <div className="collapse navbar-collapse" id="navmenu">
                         <div className="navbar-nav ms-auto">
-                        
                             <li className="nav-item dropdown">
                                 <button
                                     className="btn dropdown-toggle"
                                     id="navbarDropdown"
                                     data-bs-toggle="dropdown"
                                 >
-                                    
                                     <i className="icon_user text-white bi bi-list"></i>
                                 </button>
-
                                 <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    
                                     <li>
                                         <Link to="/MiPerfil" className="sub-menu-link dropdown-item">Mi cuenta</Link>
                                     </li>
-
                                     <li>
                                         <Link to="/inicio" className="sub-menu-link dropdown-item">Inicio</Link>
                                     </li>
-
-                                    {/* Opción de Documentos para Asesor */}
                                     {isAsesor && (
                                         <li>
                                             <Link to={'/documentos'} className="sub-menu-link dropdown-item">
@@ -67,16 +55,13 @@ export default function MainNav() {
                                             </Link>
                                         </li>
                                     )}
-
-                                    {/* Opción de Panel de Control para Administradores */}
                                     {isAdmin && (
                                         <li>
-                                            <Link to={'/admin'} className="sub-menu-link  dropdown-item">
+                                            <Link to={'/admin'} className="sub-menu-link dropdown-item">
                                                 <p>Panel de control</p>
                                             </Link>
                                         </li>
                                     )}
-
                                     <li>
                                         <hr className="dropdown-divider" />
                                     </li>

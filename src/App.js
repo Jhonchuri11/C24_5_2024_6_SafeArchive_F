@@ -17,7 +17,6 @@ import AccessDenied from './components/Auth/AccessDenied';
 import ProtectedRoute from './components/ProtectedRoute';
 import Admin from './components/AuditLogs/Admin'; 
 import StudentDetail from './components/AuditLogs/StudentDetail';
-import StudentList from './components/AuditLogs/StudentList';
 import ContentDocument from './components/Documentos/ContentDocument';
 import { Toaster } from 'react-hot-toast';
 import NotFound from './components/NotFound';

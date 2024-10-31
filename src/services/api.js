@@ -15,7 +15,7 @@ const api = axios.create({
 api.interceptors.request.use(
     async (config) => {
         const token = localStorage.getItem("JWT_TOKEN"); 
-        if (token) {
+        if (token) {    
             config.headers.Authorization = `Bearer ${token}`; 
         }
 
@@ -68,9 +68,12 @@ export const fetchStudentById = async (userId) => {
 
 
 export const changeUserRole = async (userId, roleData) => {
-    const response = await api.put(`/update-role?userId=${userId}&nombreRol=${roleData}`, {}); // Aquí pasas los datos
-    return response.data; // Devuelve los datos de la respuesta
+    // Asegúrate de que roleData sea un objeto que contenga un campo válido como 'nombreRol'
+    const response = await api.put(`/admin/update-role?userId=${userId}&nombreRol=${roleData.nombreRol}`, {});
+    return response.data;
 };
+
+
 
 // Nueva función para obtener todos los estudiantes
 export const fetchStudents = async () => {
