@@ -77,7 +77,7 @@ export default function CreatedDocumento() {
       try {
         setLoading(true)
         // enviamos solicitud
-        const response = await api.post('/documentos/upload', formData, {
+        const response = await api.post('/documentos/uploaddrive', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -110,7 +110,7 @@ export default function CreatedDocumento() {
   }
 
     return (
-        <section className="container p-3">
+        <section className="container mt-4">
           <div className="row">
                     <div className="col-12 col-md-12 col-sm-12 col-lg-12 col-xl-12">
                         <nav aria-label="breadcrumb">

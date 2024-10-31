@@ -26,7 +26,6 @@ import FormularioReporte from './components/Reportes/FormularioReporte';
 import ListaReportes from './components/Reportes/ListaReportes';
 import DocumentoDetails from './components/Documentos/DocumentoDetails';
 
-
 function MainLayout( { children }) {
   return (
     <>
@@ -106,7 +105,7 @@ export default function App() {
           {/* Rutas protegidas */}
           
 
-          <Route path='/documentos/:id' 
+          <Route path='/documentos/editar-documento/:id' 
              element={
             <ProtectedRoute>
               <MainLayout>

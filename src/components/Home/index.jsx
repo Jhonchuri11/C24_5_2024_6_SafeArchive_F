@@ -1,17 +1,19 @@
 import '../../style/Inicio.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { SkeletonBlock }  from "skeleton-elements/react";
+import doctesis from '../../assets/images/doc_tesis.png';
+import { SkeletonBlock, SkeletonImage, SkeletonText, }  from "skeleton-elements/react";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 export default function Inicio() {
 
     // filtro basico para categoria
-    const [categoria, setCategoria] = useState('');
+    const [selectedCategoria, setSelectedCategoria] = useState('');
 
-    const [resumen, setResumen] = useState('');
+    const [terminoBusqueda, setTerminoBusqueda] = useState('');
 
     // filtros avanzados
     const [filtrosAvanzados, setFiltrosAvanzados] = useState([{ campo: '', condicion: 'contiene', valor: '' }]);
@@ -23,15 +25,61 @@ export default function Inicio() {
     // documentos list
     const [documentos, setDocumentos] = useState([]);
 
+    // miniaturas del pdf
+    const [thumbanails, setThumbanails] = useState({});
 
     const [loading, setLoading] = useState(false);
     const [errorr, setError] = useState(false);
 
     const [effect, setEffect] = useState(null); // Efecto de skeleton
 
+    // estado que maneja los elementos dinamicos
+    const [elementos, setElementos] = useState([{}]);
+
     // tipo de documento categorias
     const [categorias, setCategorias] = useState([]);
 
+    const executeBusqueda = useCallback(async () => {
+        setLoading(true);
+        try {
+            const params = {
+                categoria: selectedCategoria || null,
+                termino: terminoBusqueda || null,
+                //filtrosAvanzados: filtrosAvanzados.filter(filtro => filtro.campo && filtro.valor)
+            }
+
+            const filtrosAvanzadosParams = filtrosAvanzados
+            .filter(filtro => filtro.campo && filtro.valor)
+            .flatMap((filtro, index) => [
+                `filtrosAvanzadosCampo${index}=${encodeURIComponent(filtro.campo)}`,
+                `filtrosAvanzadosCondicion${index}=${encodeURIComponent(filtro.condicion)}`,
+                `filtrosAvanzadosValor${index}=${encodeURIComponent(filtro.valor)}`
+            ])
+            .join('&');
+
+
+            const response = await api.get(`/documentos/filtrarAvanzado?${new URLSearchParams(params).toString()}&${filtrosAvanzadosParams}`);
+
+            const documentosData = Array.isArray(response.data) ? response.data : [];
+
+            //setDocumentos(documentosData);
+
+            setTimeout(() => {
+                setDocumentos(documentosData);
+                setLoading(false); 
+            }, 2000);
+
+            //console.log(response);
+
+            //console.log(documentosData);
+
+        } catch (err) {
+            setError(err?.response?.data?.message);
+            toast.error("Error fetching documentos");
+        } finally {
+            setLoading(false);
+        }
+    }, [selectedCategoria, terminoBusqueda, filtrosAvanzados])
 
     // funcion para manejar el cambio de filtro
     const handleFiltroChange = (index, field, value) => {
@@ -65,6 +113,45 @@ export default function Inicio() {
             const documentsData = Array.isArray(response.data) ? response.data : [];
             setDocumentos(documentsData);
 
+            // objeto 
+            const thumbnailsMap = {};
+
+            // aqui llamos al otro enpoint para mostrar miniatura
+            await Promise.all(
+                documentsData.map( async (doc) => {
+                    try {
+                        const thumbnailResponse = await api.get(`documentos/img?id=${doc.id}`);
+                        thumbnailsMap[doc.id] = thumbnailResponse.data.thumbnailUrl;
+                    
+
+                    } catch (thumbnailError) {
+                        console.error(`Error al obtener miniatura para documento ${doc.id}:`, thumbnailError);
+                        thumbnailsMap[doc.id] = null;
+                    }
+                })
+            );
+
+            setThumbanails(thumbnailsMap);
+            console.log(thumbanails);
+
+        } catch (err) {
+            setError(err?.response?.data?.message);
+
+            toast.error("Error fetching documentos", err);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    const fetchDocumentosd = useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await api.get("/documentos/img?id=1");
+
+            // prueba de log
+            console.log(response);
+            //const documentsData = Array.isArray(response.data) ? response.data : [];
+            //setDocumentos(documentsData);
         } catch (err) {
             setError(err?.response?.data?.message);
 
@@ -77,63 +164,26 @@ export default function Inicio() {
     useEffect(() => {
         fetchDocumentos();
         fetchCategorias();
-    }, [fetchDocumentos, fetchCategorias]);
-
-    // funcion start busqueda basica
-    const handleSearchBasic = async () => {
-        try {
-            const params = {};
-            if (categoria) params.categoria = categoria;
-            if (resumen) params.resumen = resumen;
-            
-            const response = await 
-            api.get(`documentos/search`, { params });
-            setDocumentos(response.data);
-            console.log(response);
-
-        } catch (error) {
-            console.error("Error fetching documents:", error);
-        }
-    }
-
-    // start andvanc filters
-    const aplicarFiltros = async () => {
-        try {
-            const params = {};
-            if (categoria) params.categoria = categoria;
-            //if (filtrosAvanzados) params.filtrosAvanzados = filtrosAvanzados; 
-            // Procesar filtros avanzados
-            
-            filtrosAvanzados.forEach((filtro, index) => {
-                params[`campos`] = encodeURIComponent(filtro.campo);
-                params[`condiciones`] = encodeURIComponent(filtro.condicion);
-                params[`valores`] = encodeURIComponent(filtro.valor);
-           });
-           
-           
-
-            const response = await api.get(`documentos/search/advanced`, { params })
-
-            setDocumentos(response.data);
-            
-            console.log(response);
-
-        } catch (error) {
-            console.log("Error en obtener documentos por filtes", error);
-        }
-    }
+        fetchDocumentosd();
+    }, [fetchDocumentos, fetchCategorias, fetchDocumentosd]);
 
     const handleCategoriaChange = (e) => {
-        setCategoria(e.target.value);
-
+        setSelectedCategoria(e.target.value);
     };
 
     const handleBusquedaChange = (e) => {
-        setResumen(e.target.value);
+        setTerminoBusqueda(e.target.value);
     }
 
     const cambioEstado = () => {
         setMostrarFiltros(!mostrarFiltros);
+    };
+
+    // Funcionalidad para agregar nuevo elemento
+    const agregarElemento = (index) => {
+        const nuevoElementos = [...elementos];
+        nuevoElementos.splice(index + 1, 0, {}); // agrega un nuevo elemento despues del actual
+        setElementos(nuevoElementos);
     };
 
     const agregarFiltro = () => {
@@ -160,7 +210,7 @@ export default function Inicio() {
                 <div className="row">
                     <div className="col-md-4">
                         <select className="form-select" aria-label="Default select example"
-                        value={categoria}
+                        value={selectedCategoria}
                         onChange={handleCategoriaChange}
                         >
                             <option value="" selected>Todo el repositorio</option>
@@ -174,13 +224,12 @@ export default function Inicio() {
                     <div className="col-md-8 primero">
                         <div className="input-group mb-3">
                             <input type="text" class="form-control controlador" placeholder="Ingresar su búsqueda"
-                            value={resumen}
+                            value={terminoBusqueda}
                             onChange={handleBusquedaChange}/>
 
-                            <button class="btn btn-outline-secondary" onClick={(e)=> handleSearchBasic(e)} type="button" >
+                            <Link class="btn btn-outline-secondary" type="button" onClick={executeBusqueda} >
                                 <i className="bi bi-search"></i>
-                            </button>
-
+                            </Link>
                         </div>
                     </div>
                     <div className="col-md-2">
@@ -205,7 +254,7 @@ export default function Inicio() {
                             value={filtro.campo}
                             onChange={(e) => handleFiltroChange(index, 'campo', e.target.value )} >
                                 <option value="" defaultValue>Todos</option>
-                                <option value="autores">Autor</option>
+                                <option value="autor">Autor</option>
                                 <option value="titulo">Título</option>
                                 <option value="asesor">Asesor</option>
                                 <option value="tema">Tema</option>
@@ -216,7 +265,7 @@ export default function Inicio() {
                             value={filtro.condicion}
                             onChange={(e) => handleFiltroChange(index, 'condicion', e.target.value )}>
                                 <option value="contiene" selected>Contiene</option>
-                                <option value="nocontiene">No contiene</option>
+                                <option value="no contiene">No contiene</option>
                             </select>
                         </div>
                         <div className="col-md-6">
@@ -243,7 +292,7 @@ export default function Inicio() {
                 </div>
                 <div class="col-md-3">
                     <button className='btn btn-grey border' onClick={restaurarElementos}>Restaurar</button>
-                    <button class="btn btn-grey border" onClick={(e)=> aplicarFiltros(e)}>Aplicar</button>
+                    <button class="btn btn-grey border" onClick={executeBusqueda}>Aplicar</button>
                 </div>
             </div>
             )}
@@ -277,12 +326,18 @@ export default function Inicio() {
                     <div className="row" key={index}>
                         <div className="col-md-3 mt-4">
                             {/* Imagen de portada de documento */}
+                            
+                            {thumbanails[documento.id] ? (
                             <img
                             className="imgdocumento" 
-                            src={documento.thumbnailUrl} alt={`${documento.titulo}`}
+                            src={thumbanails[documento.id]} alt={`Miniatura de ${documento.titulo}`}
                             width={"240px"} 
                             height={"240px"} 
+                            crossOrigin="use-credentials"
                             />
+                            ) : (
+                                <p>Cargando </p>
+                            )}
                         </div>
                         <div className="col-md-9 mt-4">
                             <Link to={`/detalle/${documento.id}`} className='documento'>{documento.titulo} </Link>
@@ -293,7 +348,6 @@ export default function Inicio() {
                     ))}
                 </div>
                 )}
-
                 <nav aria-label="Page navigation">
                     <ul class="pagination">
                         <li class="page-item"><a class="page-link" href="#">Anterior</a></li>
