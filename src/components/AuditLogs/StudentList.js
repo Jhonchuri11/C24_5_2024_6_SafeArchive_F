@@ -109,8 +109,6 @@ const StudentList = () => {
                     <option value="administrador">Administrador</option>
                     <option value="asesor">Asesor</option>
                     <option value="estudiante">Estudiante</option>
-                    <option value="monitor">Monitor</option>
-                    <option value="revisor">Revisor</option>
                 </select>
 
                 <button className="role-button" onClick={() => handleChangeRole(student.userId)}>
