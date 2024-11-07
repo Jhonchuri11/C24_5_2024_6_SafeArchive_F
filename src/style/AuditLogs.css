@@ -1,0 +1,53 @@
+.logs-per-page {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 10px;
+}
+
+.logs-label {
+    font-weight: bold;
+    color: #4a4a4a;
+    font-size: 1rem;
+}
+
+.logs-select {
+    padding: 8px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    color: #333;
+    background-color: #f9f9f9;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logs-select:hover {
+    border-color: #007bff;
+    background-color: #eef3ff;
+}
+
+.pagination {
+    margin-top: 20px;
+}
+
+.page-button {
+    padding: 5px 10px;
+    margin: 0 2px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.page-button.active,
+.page-button:hover {
+    background-color: #007bff;
+    color: white;
+}
+
+.page-button:disabled {
+    background-color: #d1d1d1;
+    cursor: not-allowed;
+}
