@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { fetchStudents, deleteUser, changeUserRole } from '../../services/api';
 import { Link } from 'react-router-dom';
 import '../../style/StudentList.css';
+import { IconButton, Tooltip } from "@mui/material";
+import { MdRemoveRedEye } from 'react-icons/md';
 
 const StudentList = () => {
     const [students, setStudents] = useState([]);
@@ -85,7 +87,7 @@ const StudentList = () => {
                     <option value={20}>20</option>
                 </select>
             </div>
-
+            
             <ul className="student-list">
     {currentStudents.map(student => (
         <li key={student.userId} className="student-list-item">
@@ -119,7 +121,7 @@ const StudentList = () => {
     ))}
 </ul>
 
-
+            
             <div className="pagination">
                 {Array.from({ length: Math.ceil(filteredStudents.length / studentsPerPage) }, (_, index) => (
                     <button
@@ -131,6 +133,52 @@ const StudentList = () => {
                         {index + 1}
                     </button>
                 ))}
+            </div>
+
+        <div className="content_documento container ">
+                <div className="row mb-3">
+                    <div className="col-12">
+                        <div className="box_block mt-3">
+                            <div className="card-header box_header_1 py-2">
+                                <span>USUARIOS - LISTADO</span>
+                            </div>
+                            <div className="card card-body rounded-0 border-0 ">
+                                
+                                <div className="table-responsive d-flex flex-column align-items-center mt-4">
+                                    
+                                    
+                                    <table className="table table-hover table-bordered">
+                                        <thead>
+                                            <tr className="rounded-top text-center">
+                                                <th className="tableheadercolor py-1" style={{ width: "80px" }}><b>USUARIO</b></th>
+                                                <th className="tableheadercolor  py-1" style={{ width: "80px" }}><b>Role</b></th>
+                                                <th className="tableheadercolor py-1" style={{ width: "80px" }}><b>Acción</b></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className='text-center'>
+                                            {currentStudents.map((log, id) => (
+                                                <tr key={id}>
+                                                    <td>{log.correoCorporativo}</td>
+                                                    <td>{log.nombre_rol}</td>
+                                                    <td>
+                                                        <Tooltip>
+                                                         
+                                                                <IconButton>
+                                                                    <MdRemoveRedEye color="#28AECE" />
+                                                                </IconButton>
+                                                          
+                                                        </Tooltip>
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
             </div>
         </div>
     );

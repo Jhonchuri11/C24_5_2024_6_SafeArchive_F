@@ -2,13 +2,13 @@ import React from "react";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import logotec from '../../assets/images/Tec-update-01.png';
 import { faFacebookF, faTwitter, faInstagram, faLinkedinIn } from '@fortawesome/free-brands-svg-icons';
-
+import '../../style/Footer.css';
 
 export default function MainFooter() {
 
    
    return (
-    <footer className="bg-dark text-white py-4">
+    <footer className="footer_p bg-dark text-white py-4">
         <div className="container">
           <div className="row align-items-center">
             <div className="col-md-8">

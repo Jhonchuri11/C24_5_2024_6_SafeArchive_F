@@ -34,15 +34,19 @@ export default function Detalle() {
     const handleDowload = async () => {
         try 
         {
-            const response = await api.get(`/documentos/download?id=${documentoId}`, {
+            const response = await api.get(`/documentos/download/pdf?id=${documentoId}`, {
                 responseType: 'blob',
             });
+
+            console.log(response.headers);
+            console.log(response.data);
+            console.log(response);
 
             // Creamos una url para el archivo
             const url = window.URL.createObjectURL( new Blob([response.data], { type: 'application/pdf' }));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', documento.titulo);
+            link.setAttribute('download', documento.autores);
             document.body.appendChild(link);
             link.click();
             
@@ -73,7 +77,7 @@ export default function Detalle() {
             <div className="container mt-3">
                 <div className="row">
                     <div className="col-md-3 mt-4">
-                        <img className="imgdocumento" src={doctesis} width={"240px"} height={"240px"}/>
+                        <img className="imgdocumento" src={documento.thumbnailUrl} alt={`${documento.titulo}`}width={"240px"} height={"240px"}/>
                         <p class="mt-4">Ver y descargar documento</p>
 
                         <button onClick={handleDowload}  className="btn btn-info documento">Descargar documento</button>

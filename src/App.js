@@ -24,6 +24,8 @@ import NotFound from './components/NotFound';
 import FormularioReporte from './components/Reportes/FormularioReporte';
 import ListaReportes from './components/Reportes/ListaReportes';
 import DocumentoDetails from './components/Documentos/DocumentoDetails';
+import ItemDocumento from './components/Documentos/ItemDocumento';
+import ListDisableDocument from './components/Documentos/ListDisableDocument';
 
 function MainLayout( { children }) {
   return (
@@ -63,7 +65,7 @@ export default function App() {
         element={<ProtectedRoute>
           <MainLayout>
             <ListDocumentos/>
-            </MainLayout>
+          </MainLayout>
           </ProtectedRoute>} />
 
           <Route path='/detalle/:documentoId' element={
@@ -101,8 +103,22 @@ export default function App() {
             </ProtectedRoute>
           }/>
 
-          {/* Rutas protegidas */}
-          
+          {/* Rutas para documentos */}
+          <Route path='/documento-datos/:id' element={
+            <ProtectedRoute>
+              <MainLayout>
+              <ItemDocumento/>
+              </MainLayout>
+            </ProtectedRoute>
+          }/>
+
+          <Route path='/documentos-deshabilitados' element={
+            <ProtectedRoute>
+              <MainLayout>
+              <ListDisableDocument/>
+              </MainLayout>
+            </ProtectedRoute>
+          }/>
 
           <Route path='/documentos/editar-documento/:id' 
              element={

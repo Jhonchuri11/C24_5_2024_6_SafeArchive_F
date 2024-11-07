@@ -1,14 +1,11 @@
-import React,  { useState } from 'react';
-import logotec from '../../assets/images/Tec-update-01.png';
-import '../../style/Dropdown.css';
-import { useNavigate, Link } from "react-router-dom";
-import { useMyContext } from "../../store/ContextApi";
+import React, { useState } from 'react';
 import { Modal } from 'react-bootstrap';
+import { Link, useNavigate } from "react-router-dom";
+import { useMyContext } from "../../store/ContextApi";
 
 export default function MainNav() {
     const navigate = useNavigate();
     const { setToken, setCurrentUser, isAdmin, setIsAdmin, isAsesor, setIsAsesor } = useMyContext();
-
     const [showModal, setShowModal] = useState(false);
 
     const handleLogout = () => {
@@ -29,7 +26,7 @@ export default function MainNav() {
             <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
                 <div className="container">
                     <Link to="/inicio">
-                        <img src={logotec} width={"250px"} className="navbar-brand" alt="Logo" />
+                        <img src="/placeholder.svg?height=50&width=250" width="250" height="50" className="navbar-brand" alt="Logo" />
                     </Link>
                     <button 
                         className="navbar-toggler" 
@@ -38,22 +35,21 @@ export default function MainNav() {
                     >
                         <span className="navbar-toggler-icon"></span>
                     </button>
-
                     <div className="collapse navbar-collapse" id="navmenu">
                         <div className="navbar-nav ms-auto">
                             <li className="nav-item dropdown">
                                 <button
-                                    className="btn dropdown-toggle"
+                                    className="btn"
                                     id="navbarDropdown"
                                     data-bs-toggle="dropdown"
+                                    aria-expanded="true"
                                 >
                                     <i className="icon_user text-white bi bi-list"></i>
                                 </button>
-                                <ul className="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                <ul className="dropdown-menu dropdown-menu-end show" aria-labelledby="navbarDropdown">
                                     <li>
                                         <Link to="/MiPerfil" className="sub-menu-link dropdown-item">Mi cuenta</Link>
                                     </li>
-                                  
                                     {isAsesor && (
                                         <li>
                                             <Link to={'/documentos'} className="sub-menu-link dropdown-item">
@@ -90,7 +86,7 @@ export default function MainNav() {
 
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
-                    
+                    <Modal.Title>Opciones</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <ul className="list-unstyled">
@@ -122,7 +118,6 @@ export default function MainNav() {
                     </ul>
                 </Modal.Body>
             </Modal>
-
         </header>
     )
 }

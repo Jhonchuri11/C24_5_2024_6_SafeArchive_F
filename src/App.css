@@ -1,9 +1,8 @@
 body, html {
     height: 100%;
-    margin: 0;
-    font-family: Cambria, Cochin, Georgia, Times, 'Times New Roman', serif;
-    -webkit-font-smoothing: antialiased;
+    margin: 0;;
 }
+
 /* Contenedor principal del layout */
 .layout-container {
   display: flex;
@@ -13,5 +12,10 @@ body, html {
 
 /* Contenido crece para llenar el espacio disponible */
 .content-container {
-  flex: 1; /* Esto permite que el contenido ocupe todo el espacio restante */
+  flex: 1;
+  /* Esto permite que el contenido ocupe todo el espacio restante */
+}
+
+footer {
+  position: relative;
 }

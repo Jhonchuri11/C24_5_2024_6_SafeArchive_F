@@ -1,29 +1,29 @@
 /* Archivo Sidebar.css */
 .sidebar-container {
-    position: fixed;
-    top: 74px;
-    min-height: calc(100vh - 74px);
-    max-height: calc(100vh - 74px);
-    left: 0;
+    position: sticky;
+    top: 100px;
+    min-height: calc(100vh - 70px);
+    max-height: calc(100vh - 70px);
     z-index: 20;
     padding: 10px;
     transition: width 0.3s ease-in-out;
   }
   
   .sidebar-container.expanded {
-    width: 13rem; /* Aproximadamente w-52 en Tailwind */
+    width: 18rem;
+    transition: width 0.3s ease-in-out;
+
+    
   }
   
   .sidebar-container.collapsed {
-    width: 3rem; /* Aproximadamente w-12 en Tailwind */
+    width: 10rem; 
+    transition: width 0.3s ease-in-out;
+
   }
   
   .hover-bg-btnColor:hover {
     background-color: #4a90e2; /* Cambia a tu color de botón personalizado */
-  }
-  
-  .bg-headerColor {
-    background-color: #333; /* Ejemplo de color de fondo personalizado */
   }
   
   .bg-btnColor {

@@ -1,6 +1,5 @@
 import '../../style/Inicio.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { SkeletonBlock }  from "skeleton-elements/react";
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
@@ -27,10 +26,12 @@ export default function Inicio() {
     const [loading, setLoading] = useState(false);
     const [errorr, setError] = useState(false);
 
-    const [effect, setEffect] = useState(null); // Efecto de skeleton
-
     // tipo de documento categorias
     const [categorias, setCategorias] = useState([]);
+
+    // paginacion de documentos
+    const [currentPage, setCurrentPage] = useState(0); // Página actual
+    const [totalDocuments, setTotalDocuments] = useState(0); // Total de documentos
 
 
     // funcion para manejar el cambio de filtro
@@ -55,19 +56,19 @@ export default function Inicio() {
         }
     }, []);
 
-    const fetchDocumentos = useCallback(async () => {
+    const fetchDocumentos = useCallback(async (page = 0, limit = 10 ) => {
         setLoading(true);
         try {
-            const response = await api.get("documentos/all");
-
-            // prueba de log
-            console.log(response.data);
+            const response = await api.get(`documentos/all/paginations`, { params: { page, limit }});
             const documentsData = Array.isArray(response.data) ? response.data : [];
+
             setDocumentos(documentsData);
+
+            // total documentos
+            setTotalDocuments(parseInt(response.headers['x-total-count'], 10));
 
         } catch (err) {
             setError(err?.response?.data?.message);
-
             toast.error("Error fetching documentos", err);
         } finally {
             setLoading(false);
@@ -75,9 +76,9 @@ export default function Inicio() {
     }, []);
 
     useEffect(() => {
-        fetchDocumentos();
+        fetchDocumentos(currentPage);
         fetchCategorias();
-    }, [fetchDocumentos, fetchCategorias]);
+    }, [fetchDocumentos, fetchCategorias, currentPage]);
 
     // funcion start busqueda basica
     const handleSearchBasic = async () => {
@@ -96,20 +97,40 @@ export default function Inicio() {
         }
     }
 
+    // funcion paginacion
+    const handlePageChange = (pageNumber) => {
+        setCurrentPage(pageNumber);
+        fetchDocumentos(pageNumber);
+    }
+
     // start andvanc filters
     const aplicarFiltros = async () => {
         try {
-            const params = {};
+            const params = {
+            };
+
+            
             if (categoria) params.categoria = categoria;
+            if (resumen) params.resumen = resumen;
             //if (filtrosAvanzados) params.filtrosAvanzados = filtrosAvanzados; 
             // Procesar filtros avanzados
+
             
-            filtrosAvanzados.forEach((filtro, index) => {
+            
+            filtrosAvanzados.forEach((filtro) => {
                 params[`campos`] = encodeURIComponent(filtro.campo);
                 params[`condiciones`] = encodeURIComponent(filtro.condicion);
                 params[`valores`] = encodeURIComponent(filtro.valor);
            });
            
+
+           /*
+           filtrosAvanzados.forEach((filtro) => {
+            params.campos.push(encodeURIComponent(filtro.campo));
+            params.condiciones.push(encodeURIComponent(filtro.condicion));
+            params.valores.push(encodeURIComponent(filtro.valor));
+           })
+            */
            
 
             const response = await api.get(`documentos/search/advanced`, { params })
@@ -159,11 +180,11 @@ export default function Inicio() {
             <div className="container">
                 <div className="row">
                     <div className="col-md-4">
-                        <select className="form-select" aria-label="Default select example"
+                        <select className="form-select border border-grey-1" aria-label="Default select example"
                         value={categoria}
                         onChange={handleCategoriaChange}
                         >
-                            <option value="" selected>Todo el repositorio</option>
+                            <option value="">Todo el repositorio</option>
                             {categorias.map((catego) => (
                                 <option key={catego.categoria_id} value={catego.categoria_id}>
                                     {catego.nombre_categoria}
@@ -173,7 +194,7 @@ export default function Inicio() {
                     </div>
                     <div className="col-md-8 primero">
                         <div className="input-group mb-3">
-                            <input type="text" class="form-control controlador" placeholder="Ingresar su búsqueda"
+                            <input type="text" class="form-control controlador border border-grey-1" placeholder="Ingresar su búsqueda"
                             value={resumen}
                             onChange={handleBusquedaChange}/>
 
@@ -199,12 +220,12 @@ export default function Inicio() {
                 <div id="contenedor">
 
                     {filtrosAvanzados.map((filtro, index) => 
-                    <div className="row elemento">
-                        <div className="col-md-3" key={index}>
-                            <select class="form-select" aria-label="Campo" 
+                    <div className="row elemento" key={index}>
+                        <div className="col-md-3">
+                            <select class="form-select border border-grey-1" aria-label="Campo" 
                             value={filtro.campo}
                             onChange={(e) => handleFiltroChange(index, 'campo', e.target.value )} >
-                                <option value="" defaultValue>Todos</option>
+                                <option value="todo">Todos</option>
                                 <option value="autores">Autor</option>
                                 <option value="titulo">Título</option>
                                 <option value="asesor">Asesor</option>
@@ -212,16 +233,16 @@ export default function Inicio() {
                             </select>
                         </div>
                         <div class="col-md-3">
-                            <select class="form-select" aria-label="Condicion"
+                            <select class="form-select border border-grey-1" aria-label="Condicion"
                             value={filtro.condicion}
                             onChange={(e) => handleFiltroChange(index, 'condicion', e.target.value )}>
-                                <option value="contiene" selected>Contiene</option>
+                                <option value="contiene">Contiene</option>
                                 <option value="nocontiene">No contiene</option>
                             </select>
                         </div>
                         <div className="col-md-6">
                             <div className="input-group mb-3">
-                                <input type="text" class="form-control" 
+                                <input type="text" class="form-control border border-grey-1" 
                                 placeholder="Ingresar su búsqueda" 
                                 value={filtro.valor}
                                 onChange={(e) => handleFiltroChange(index, 'valor', e.target.value )}
@@ -251,56 +272,67 @@ export default function Inicio() {
              {/* Resultados de listado para documentos */}
 
             <div className="container mt-3">
-                <p>Mostrando items 1-2 de 200</p>
-
-                 {/* sKeleton*/}
-
-                { loading ? (
-                    <div className='row'>
-                        {[...Array(4)].map((_, index) => {
-                            
-                        <div className='cold-md-12 mt-4' key={index}>
-                             <SkeletonBlock tag="p" width={300} height={20} effect={effect}/>
-                             <SkeletonBlock tag="p" width={200} height={20} effect={effect}/>
-                             <SkeletonBlock tag="p" width="100%" height={100} effect={effect}/>
-                         </div>
-                     
-                        })}
-                    </div>
-
-                ) : errorr ? (
-                    toast.error("Failed documentos!")
-                ) : (
+                <p>
+                    Mostrando items {currentPage * 10 + 1 }-
+                    {Math.min((currentPage + 1 ) * 10, totalDocuments)} de {totalDocuments}
+                </p>
                 <div className="row">
                     { documentos.map((documento, index) => (
                     
                     <div className="row" key={index}>
                         <div className="col-md-3 mt-4">
-                            {/* Imagen de portada de documento */}
+                            <Link to={`/detalle/${documento.id}`}>
                             <img
                             className="imgdocumento" 
                             src={documento.thumbnailUrl} alt={`${documento.titulo}`}
                             width={"240px"} 
                             height={"240px"} 
                             />
+                            </Link>
                         </div>
                         <div className="col-md-9 mt-4">
                             <Link to={`/detalle/${documento.id}`} className='documento'>{documento.titulo} </Link>
                             <p>{documento.autores}</p>
-                            <p class="text-justify">{documento.resumen}</p>
+
+                            <p className="texto-resumen text-justify">
+                                {documento.resumen}
+                            </p>
+
                         </div> 
                     </div>
                     ))}
                 </div>
-                )}
 
                 <nav aria-label="Page navigation">
                     <ul class="pagination">
-                        <li class="page-item"><a class="page-link" href="#">Anterior</a></li>
-                        <li class="page-item"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">Siguiente</a></li>
+                        <li class="page-item">
+                            <button 
+                                class="page-link" 
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 0}>
+                                Anterior
+                            </button>
+                        </li>
+
+                        {Array.from({ length: Math.ceil(totalDocuments / 10 ) }, (_, index ) => (
+                            <li class="page-item" key={index}>
+                                <button 
+                                    class="page-link"
+                                    onClick={() => handlePageChange(index)}
+                                    disabled={index === currentPage}>
+                                        { index + 1 }
+                                </button>
+                            </li>
+                        ))}
+                        
+                        <li class="page-item">
+                            <button 
+                                class="page-link" 
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={(currentPage + 1 ) * 10 >= totalDocuments}>
+                                    Siguiente
+                            </button>
+                        </li>
                     </ul>
                 </nav>
                 <hr/>

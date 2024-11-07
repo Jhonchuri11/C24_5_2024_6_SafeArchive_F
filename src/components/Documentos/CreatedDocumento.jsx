@@ -19,10 +19,14 @@ export default function CreatedDocumento() {
     const [titulo, setTitulo] = useState('');
     const [autores, setAutores] = useState('');
     const [resumen, setResumen] = useState('');
-    const [anioPublicacion, setAnioPublicacion] = useState('');
+    const [fechaPublicacion, setFechaPublicacion] = useState('');
     const [asesor, setAsesor] = useState('');
     const [categoria, setCategoria] = useState('');
     const [tema, setTema] = useState('');
+    const [carrera, setCarrera] = useState('');
+    const [ciclo, setCiclo] = useState('');
+    const [seccion, setSeccion] = useState('');
+    const [semestre, setSemestre] = useState('');
     const [file, setFile] = useState(null);
 
     // categorias de documentos
@@ -59,7 +63,8 @@ export default function CreatedDocumento() {
       event.preventDefault();
     
        // Verificar si los campos están vacíos
-      if (!titulo || !autores || !resumen || !anioPublicacion || !asesor || !categoria || !tema || !file) {
+      if (!titulo || !autores || !resumen || !fechaPublicacion || !asesor || !categoria || !tema || !file 
+        || !carrera || !ciclo || !seccion || !semestre) {
         return toast.error("Todos los campos son obligatorios y debes subir un archivo.");
       }
 
@@ -69,10 +74,14 @@ export default function CreatedDocumento() {
       formData.append('titulo', titulo);
       formData.append('autores', autores);
       formData.append('resumen', resumen);
-      formData.append('anioPublicacion', anioPublicacion);
+      formData.append('fechaPublicacion', fechaPublicacion);
       formData.append('asesor', asesor);
       formData.append('categoria', categoria);
       formData.append('tema', tema);
+      formData.append('carrera', carrera);
+      formData.append('ciclo', ciclo);
+      formData.append('seccion', seccion);
+      formData.append('semestre', semestre);
 
       try {
         setLoading(true)
@@ -85,7 +94,7 @@ export default function CreatedDocumento() {
         toast.success("Documento create successsful");
         navigate("/documentos");
 
-        console.log('Documento subido con éxito:', response.data);
+        console.log('Documento subido con éxito:', response);
       } catch (error) {
         setError(error.response.data.message);
         console.error("Error al subir el documento:", error);
@@ -135,7 +144,7 @@ export default function CreatedDocumento() {
             </div>
             <input
               type="text"
-              className="form-control"
+              className="form-control border border-grey-1"
               onChange={(e) => setTitulo(e.target.value)}
               id="titulo"
               name="titulo"
@@ -153,7 +162,7 @@ export default function CreatedDocumento() {
             </div>
             <input
               type="text"
-              className="form-control"
+              className="form-control border border-grey-1"
               placeholder="Nombres y apellidos"
               onChange={(e) => setAutores(e.target.value)}
               id="autores"
@@ -170,7 +179,7 @@ export default function CreatedDocumento() {
               <i className="bi bi-card-text"></i>
             </div>
             <textarea
-              className="form-control"
+              className="form-control border border-grey-1"
               placeholder="Resumen"
               onChange={(e) => setResumen(e.target.value)}
               id="resumen"
@@ -181,19 +190,18 @@ export default function CreatedDocumento() {
         </div>
 
         <div className="col-6">
-          <label>AÑO DE PUBLICACIÓN<span className="text-danger">*</span></label>
+          <label>FECHA DE PUBLICACIÓN<span className="text-danger">*</span></label>
           <div className="input-group">
             <div className="input-group-text">
               <i className="bi bi-calendar2-day"></i>
             </div>
             <input
-              type="number"
-              className="form-control"
-              placeholder="Ejemplo: 2023"
-              onChange={(e) => setAnioPublicacion(e.target.value)}
-              id="anioPublicacion"
-              name="anioPublicacion"
-              value={anioPublicacion}
+              type="Date"
+              className="form-control border border-grey-1"
+              onChange={(e) => setFechaPublicacion(e.target.value)}
+              id="fechaPublicacion"
+              name="fechaPublicacion"
+              value={fechaPublicacion}
             />
           </div>
         </div>
@@ -206,7 +214,7 @@ export default function CreatedDocumento() {
             </div>
             <input
               type="text"
-              className="form-control"
+              className="form-control border border-grey-1"
               placeholder="Nombres y apellidos"
               onChange={(e) => setAsesor(e.target.value)}
               id="asesor"
@@ -223,7 +231,7 @@ export default function CreatedDocumento() {
               <i className="bi bi-bookmark-star"></i>
             </div>
             <select
-              className="form-control"
+              className="form-control border border-grey-1"
               onChange={(e) => { setCategoria(e.target.value);
                 console.log('Categoria seleccionada:', e.target.value);
                }
@@ -251,7 +259,7 @@ export default function CreatedDocumento() {
             </div>
             <input
               type="text"
-              className="form-control"
+              className="form-control border border-grey-1"
               placeholder="Tema"
               onChange={(e) => setTema(e.target.value)}
               id="tema"
@@ -260,10 +268,80 @@ export default function CreatedDocumento() {
             />
           </div>
         </div>
-
+        <div className="col-6">
+          <label>CARRERA<span className="text-danger">*</span></label>
+          <div className="input-group">
+            <div className="input-group-text">
+              <i className="bi bi-chat-square-text-fill"></i>
+            </div>
+            <input
+              type="text"
+              className="form-control border border-grey-1"
+              placeholder="Ejemplo: Diseño y Desarrollo de Software"
+              onChange={(e) => setCarrera(e.target.value)}
+              id="carrera"
+              name="carrera"
+              value={carrera}
+            />
+          </div>
+        </div>
+        <div className="col-6">
+          <label>CICLO<span className="text-danger">*</span></label>
+          <div className="input-group">
+            <div className="input-group-text">
+              <i className="bi bi-chat-square-text-fill"></i>
+            </div>
+            <input
+              type="text"
+              className="form-control border border-grey-1"
+              placeholder="Ejemplo: I, II, III, IV, V, VI"
+              onChange={(e) => setCiclo(e.target.value)}
+              id="ciclo"
+              name="ciclo"
+              value={ciclo}
+            />
+          </div>
+        </div>
+        <div className="col-6">
+          <label>SECCIÓN<span className="text-danger">*</span></label>
+          <div className="input-group">
+            <div className="input-group-text">
+              <i className="bi bi-chat-square-text-fill"></i>
+            </div>
+            <input
+              type="text"
+              className="form-control border border-grey-1"
+              placeholder="Ejemplo: A, B , C, D"
+              onChange={(e) => setSeccion(e.target.value)}
+              id="seccion"
+              name="seccion"
+              value={seccion}
+            />
+          </div>
+        </div>
+        <div className="col-6">
+          <label>SEMESTRE<span className="text-danger">*</span></label>
+          <div className="input-group">
+            <div className="input-group-text">
+              <i className="bi bi-chat-square-text-fill"></i>
+            </div>
+            <input
+              type="text"
+              className="form-control border border-grey-1"
+              placeholder="Ejemplo: 2024-1, 2024-2, 2023-2"
+              onChange={(e) => setSemestre(e.target.value)}
+              id="semestre"
+              name="semestre"
+              value={semestre}
+            />
+          </div>
+        </div>
         <div className="col-sm-6 mb-3">
           <label htmlFor="formFile" className="form-label">Archivo pdf:</label>
-          <input className="form-control border" type="file" id="file" onChange={handleFileChange} accept="application/pdf" />
+          <input
+           className="form-control border border-grey-1" 
+           type="file" 
+           id="file" onChange={handleFileChange} accept="application/pdf" />
         </div>
 
         <div className="col-12">

@@ -6,11 +6,13 @@ import toast from "react-hot-toast";
 import Errors from "../Errors";
 import { IconButton, Tooltip } from "@mui/material";
 import { MdRemoveRedEye } from "react-icons/md";
-import { FaBan, FaChevronCircleLeft, FaChevronCircleRight,FaEdit, FaFileAlt, FaFileArchive, FaFileUpload, FaTrash } from "react-icons/fa";
+import { FaBan, FaCheckCircle, FaChevronCircleLeft, FaChevronCircleRight, FaEdit, FaFileAlt, FaTrash } from "react-icons/fa";
+import { FiDelete } from "react-icons/fi";
 import DocumentPreviewModal from "../Asesor/DocumentPreviewModal;";
 import Swal from "sweetalert2";
 
-const ContentDocument = () => {
+const ListDisableDocument = () => {
+
     const [documentos, setDocumentos] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
@@ -22,10 +24,11 @@ const ContentDocument = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const documentsPerPage = 2;
 
+
     const fectchDocumentos = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await api.get("/documentos", { params: { status: true } });
+            const response = await api.get("/documentos", { params: { status: false } });
             const documentData = Array.isArray(response.data) ? response.data : [];
             setDocumentos(documentData);
             console.log(documentData);
@@ -61,45 +64,23 @@ const ContentDocument = () => {
         }
     }
 
-    const handleDeleteDocumento = async (docId) => {
-        Swal.fire({
-            title: "Estás seguro?",
-            text: "Este documento se eliminará de forma permanente.",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonText: "Sí, eliminar",
-            cancelButtonText: "No, cancelar",
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    await api.delete(`/documentos/deletedoc/${docId}`);
-                    setDocumentos(documentos.filter((doc) => doc.id !== docId));
-                    toast.success("Documento eliminado exitosamente!");
-                } catch (error) {
-                    console.error("Ocurrió un error eliminado el documento", error);
-                    toast.error("No se puede eliminar el documento.");
-                }
-            }
-        });
-    };
-
     const handleDisableDocumento = async (docId) => {
         Swal.fire({
             title: "Estás seguro?",
-            text: "Este documento se deshabilitará, pero lo puedes volver a habilitar.",
+            text: "Este documento se habilitará.",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonText: "Sí, deshabilitar",
+            confirmButtonText: "Sí, habilitar",
             cancelButtonText: "No, cancelar",
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    await api.put(`/documentos/${docId}/deshabilitar`);
+                    await api.put(`/documentos/${docId}/habilitar`);
                     setDocumentos(documentos.filter((doc) => doc.id !== docId));
-                    toast.success("El documento ha sido deshabilitado correctamente.");
+                    toast.success("El documento ha sido habilitado correctamente.");
                 } catch (error) {
-                    console.error("Ocurrió un error al deshabilitar el documento", error);
-                    toast.error("No se puede deshabilitar el documento.");
+                    console.error("Ocurrió un error al habilitar el documento", error);
+                    toast.error("No se puede habilitar el documento.");
                 }
             }
         });
@@ -123,6 +104,7 @@ const ContentDocument = () => {
             setCurrentPage(currentPage - 1);
         }
     };
+
 
     // funcion para el modal
     const handleCloseModal = () => {
@@ -148,7 +130,7 @@ const ContentDocument = () => {
                                 </li>
                                 <li className="breadcrumb-item" aria-current="page">Documentos
                                 </li>
-                                <li className="breadcrumb-item active" aria-current="page"> Formato registro de documento</li>
+                                <li className="breadcrumb-item active" aria-current="page"> Documentos deshabilitados</li>
                             </ol>
                         </nav>
                     </div>
@@ -158,27 +140,6 @@ const ContentDocument = () => {
             <div className="content_documento container ">
                 <div className="row mb-3">
                     <div className="col-12">
-                        <div className="box_block">
-                            <div className="card-header box_header_1 py-2">
-                                
-                                <span>FORMATO REGISTRO DE DOCUMENTO</span>
-                            </div>
-                            <div className="card card-body rounded-0 border-0 div-etapa" id="div-beneficio" data-nivel="0">
-                                <div className="row d-flex flex-row justify-content-center align-items-center">
-                                    <div className="card mx-3 mb-2 mb-sm-0 card-beneficio s_card_button" id="btn_iniciarRenuncia">
-                                        <Link className="btn_register" to="/createDocumento">
-                                            <div className="card-body p-3 mx-auto text-center" style={{ width: "160px" }}>
-                                                <p className="card-title mb-1">Registro de información de documento</p>
-                                                <FaFileUpload size={30} color="#28AECE"/>
-                                            </div>
-                                        </Link>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="mt-4">
-                            <Link to="/documentos-deshabilitados" className="box_header_1 btn px-4 me-2" >Ver documentos deshabilitados</Link>
-                        </div>
                         <div className="box_block mt-3">
                             <div className="card-header box_header_1 py-2">
                                 <span>LISTADO DE DOCUMENTO</span>
@@ -191,10 +152,11 @@ const ContentDocument = () => {
                                     <table className="table table-hover table-bordered">
                                         <thead>
                                             <tr className="rounded-top">
+                                                <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Asesor</b></th>
                                                 <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Título</b></th>
                                                 <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Autores</b></th>
                                                 <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Fecha de publicación</b></th>
-                                                <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Categoria</b></th>
+                                                <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Tipo de documento</b></th>
                                                 <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Tema</b></th>
                                                 <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Documento</b></th>
                                                 <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Fecha creado</b></th>
@@ -205,9 +167,10 @@ const ContentDocument = () => {
                                         <tbody>
                                             {currentDocuments.map((doc, id) => (
                                                 <tr key={id}>
+                                                    <td>{doc.asesor}</td>
                                                     <td>{doc.titulo}</td>
                                                     <td>{doc.autores}</td>
-                                                    <td>{doc.fechaPublicacion}</td>
+                                                    <td>{doc.anioPublicacion}</td>
                                                     <td>{doc.categoria ? doc.categoria.nombre_categoria : "N/A"}</td>
                                                     <td>{doc.tema}</td>
                                                     <td className="text-center py-2">
@@ -227,25 +190,13 @@ const ContentDocument = () => {
                                                         <Tooltip title="Ver detalle de documento">
                                                             <Link to={`/documento-datos/${doc.id}`} style={{ margin: "0 10px" }}>
                                                                 <IconButton>
-                                                                    <MdRemoveRedEye color="#28AECE" />
+                                                                    <MdRemoveRedEye color="#28AECE"  style={{ fontSize: "24px" }}/>
                                                                 </IconButton>
                                                             </Link>
                                                         </Tooltip>
-                                                        <Tooltip title="Editar documento">
-                                                            <Link to={`/documentos/editar-documento/${doc.id}`}>
-                                                                <IconButton>
-                                                                    <FaEdit color="black" />
-                                                                </IconButton>
-                                                            </Link>
-                                                        </Tooltip>
-                                                        <Tooltip title="Eliminar documento">
-                                                            <IconButton  onClick={() => handleDeleteDocumento(doc.id)} style={{ margin: "0 10px" }}>
-                                                                <FaTrash color="#E57373" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        <Tooltip title="Deshabilitar documento"> 
-                                                            <IconButton >
-                                                                <FaBan color="#28AECE" onClick={() => handleDisableDocumento(doc.id)}/>
+                                                        <Tooltip title="Habilitar documento"> 
+                                                            <IconButton>
+                                                                <FaCheckCircle color="#28AECE" onClick={() => handleDisableDocumento(doc.id)}/>
                                                             </IconButton>
                                                         </Tooltip>
                                                     </td>
@@ -254,7 +205,6 @@ const ContentDocument = () => {
                                         </tbody>
                                     </table>
                                 </div>
-                                
                                 <div aria-label="Page navigation">
                                     
                                     <span className="mt-2">Página {currentPage} de {totalPages}</span>
@@ -283,4 +233,4 @@ const ContentDocument = () => {
     );
 }
 
-export default ContentDocument;
+export default ListDisableDocument;

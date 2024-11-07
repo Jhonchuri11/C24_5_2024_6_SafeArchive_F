@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../../services/api";
 import toast from "react-hot-toast";
 import Errors from "../Errors";
@@ -7,9 +7,13 @@ import Errors from "../Errors";
 
 const DocumentoDetails = () => {
     
+    const navigate = useNavigate();
+
     // obtaing id for params
     const { id } = useParams();
     const [documentos, setDocumentos] = useState({});
+
+    // Estados para los datos del formulario
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
@@ -65,6 +69,51 @@ const DocumentoDetails = () => {
         }
     }, [id, fectchDocumentosDetails]);
 
+    // function update
+    const handleUpdateDocument = async (event) => {
+
+        event.preventDefault();
+  
+        // Crear un objeto FormData para enviar los datos
+        const formData = new FormData();
+        formData.append('titulo', documentos.titulo);
+        formData.append('autores', documentos.autores);
+        formData.append('resumen', documentos.resumen);
+        formData.append('fechaPublicacion', documentos.fechaPublicacion);
+        formData.append('asesor', documentos.asesor);
+        formData.append('categoria', documentos.categoria?.categoria_id || "");
+        formData.append('tema', documentos.tema)
+        formData.append('carrera', documentos.carrera);
+        formData.append('ciclo', documentos.ciclo);
+        formData.append('seccion', documentos.seccion);
+        formData.append('semestre', documentos.semestre);
+  
+        try {
+          setLoading(true)
+          // enviamos solicitud
+          const response = await api.put(`/documentos/updatedrive/${id}`, formData, {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+          });
+          toast.success("Documento update successsful");
+          navigate("/documentos");
+  
+          console.log('Documento actualizado con éxito:', response.data);
+        } catch (error) {
+          setError(error.response.data.message);
+          console.error("Error al actualizar el documento:", error);
+          toast.error("Error updating document");
+        } finally {
+          setLoading(false);
+        } 
+
+        formData.forEach((value, key) => {
+          console.log(`${key}: ${value}`);
+        });
+        
+      };
+
     useEffect(() => {
         fetchCategoria();
     }, [fetchCategoria])
@@ -96,7 +145,7 @@ const DocumentoDetails = () => {
                 </div>
             </div>
             <div className="card card-body bg-light p-4 shadow rounded">
-                <form encType="multipart/form-data">
+                <form onSubmit={handleUpdateDocument} encType="multipart/form-data">
                 <div className="row g-4">
                     <div className="col-6">
                         <label>TITULO<span className="text-success">*</span></label>
@@ -110,6 +159,7 @@ const DocumentoDetails = () => {
                                 id="titulo"
                                 name="titulo"
                                 value={documentos.titulo}
+                                onChange={(e) => setDocumentos({ ...documentos, titulo: e.target.value })}
                             >
                             </input>
                         </div>
@@ -126,6 +176,7 @@ const DocumentoDetails = () => {
                                 id="autores"
                                 name="autores"
                                 value={documentos.autores}
+                                onChange={(e) => setDocumentos({ ...documentos, autores: e.target.value })}
                             >
                             </input>
                         </div>
@@ -142,23 +193,24 @@ const DocumentoDetails = () => {
                                 id="resumen"
                                 name="resumen"
                                 value={documentos.resumen}
+                                onChange={(e) => setDocumentos({ ...documentos, resumen: e.target.value })}
                             >
                             </textarea>
                         </div>
                     </div>
                     <div className="col-6">
-                        <label>AÑO DE PUBLICACIÓN<span className="text-success">*</span></label>
+                        <label>FECHA DE PUBLICACIÓN<span className="text-success">*</span></label>
                         <div className="input-group">
                             <div className="input-group-text">
                                 <i className="bi bi-calendar2-day"></i>
                             </div>
                             <input
-                                type="number"
+                                type="Date"
                                 className="form-control border border-secondary"
-                                id="anioPublicacion"
-                                name="anioPublicacion"
-                                value={documentos.anioPublicacion}
-
+                                id="fechaPublicacion"
+                                name="fechaPublicacion"
+                                value={documentos.fechaPublicacion}
+                                onChange={(e) => setDocumentos({ ...documentos, fechaPublicacion: e.target.value })}
                             >
                             </input>
                         </div>
@@ -175,6 +227,8 @@ const DocumentoDetails = () => {
                                 id="asesor"
                                 name="asesor"
                                 value={documentos.asesor}
+                                onChange={(e) => setDocumentos({ ...documentos, asesor: e.target.value })}
+                                
                             >
                             </input>
                         </div>
@@ -190,16 +244,19 @@ const DocumentoDetails = () => {
                                 className="form-control border border-secondary"
                                 id="categoria"
                                 name="categoria"
-                                value={documentos.categoria ? documentos.categoria.nombre_categoria : ""}
-                                aria-readonly
+                                value={documentos.categoria?.categoria_id || ""}
+                                onChange={(e) => 
+                                    setDocumentos({
+                                        ...documentos,
+                                        categoria: { ...documentos.categoria, categoria_id: e.target.value },
+                                    })
+                                }
                             >   
-                                {categories.map((category) => {
-                                    return (
-                                    <option key={category.categoria_id} value={category.categoria}>
-                                        {category.nombre_categoria}
+                                {categories.map((cate) => (
+                                    <option key={cate.categoria_id} value={cate.categoria_id}>
+                                        {cate.nombre_categoria}
                                     </option>
-                                    );
-                                })}
+                                ))}
                             </select>
                         </div>
                     </div>
@@ -215,21 +272,91 @@ const DocumentoDetails = () => {
                                 id="tema"
                                 name="tema"
                                 value={documentos.tema}
+                                onChange={(e) => setDocumentos({ ...documentos, tema: e.target.value })}
                             >
                             </input>
                         </div>
                     </div>
-                    <div className="col-sm-6 mb-3">
-                        <label htmlFor="formFile" className="form-label">Archivo pdf:</label>
-                        <input 
-                        className="form-control border" type="file" id="file" accept="application/pdf"/>
+                    <div className="col-6">
+                        <label>CARRERA<span className="text-success">*</span></label>
+                        <div className="input-group">
+                            <div className="input-group-text">
+                                <i className="bi bi-chat-square-text-fill"></i>
+                            </div>
+                            <input
+                                type="text"
+                                className="form-control border border-secondary"
+                                id="carrera"
+                                name="carrera"
+                                value={documentos.carrera}
+                                onChange={(e) => setDocumentos({ ...documentos, carrera: e.target.value })}
+                            >
+                            </input>
+                        </div>
                     </div>
+                    <div className="col-6">
+                        <label>CICLO<span className="text-success">*</span></label>
+                        <div className="input-group">
+                            <div className="input-group-text">
+                                <i className="bi bi-chat-square-text-fill"></i>
+                            </div>
+                            <input
+                                type="text"
+                                className="form-control border border-secondary"
+                                id="ciclo"
+                                name="ciclo"
+                                value={documentos.ciclo}
+                                onChange={(e) => setDocumentos({ ...documentos, ciclo: e.target.value })}
+                            >
+                            </input>
+                        </div>
+                    </div>
+                    <div className="col-6">
+                        <label>SECCIÓN<span className="text-success">*</span></label>
+                        <div className="input-group">
+                            <div className="input-group-text">
+                                <i className="bi bi-chat-square-text-fill"></i>
+                            </div>
+                            <input
+                                type="text"
+                                className="form-control border border-secondary"
+                                id="seccion"
+                                name="seccion"
+                                value={documentos.seccion}
+                                onChange={(e) => setDocumentos({ ...documentos, seccion: e.target.value })}
+                            >
+                            </input>
+                        </div>
+                    </div>
+                    <div className="col-6">
+                        <label>SEMESTRE<span className="text-success">*</span></label>
+                        <div className="input-group">
+                            <div className="input-group-text">
+                                <i className="bi bi-chat-square-text-fill"></i>
+                            </div>
+                            <input
+                                type="text"
+                                className="form-control border border-secondary"
+                                id="semestre"
+                                name="semestre"
+                                value={documentos.semestre}
+                                onChange={(e) => setDocumentos({ ...documentos, semestre: e.target.value })}
+                            >
+                            </input>
+                        </div>
+                    </div>
+                    
                     <div className="col-12">
                         <button
-                            disabled={loading} className="btn btn-info px-4 float-end mt-4 me-2">
+                            disabled={loading} 
+                            className="btn btn-info px-4 float-end mt-4 me-2"
+                        >
                             { loading ? <span>Loading...</span> : " Updating documento" }
                         </button>
-                        <Link to={'/documentos'} className="btn btn-success px-4 float-end mt-4 me-2">Cancelar</Link>
+                        <Link to={'/documentos'} 
+                        className="btn btn-success px-4 float-end mt-4 me-2">
+                            Cancelar
+                        </Link>
                     </div>
                 </div>
                 </form>

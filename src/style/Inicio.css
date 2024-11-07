@@ -44,3 +44,14 @@
     width: 100%; 
     height: auto; 
 }
+
+.texto-resumen {
+    display: -webkit-box;
+    display: box;
+    -webkit-box-orient: vertical;
+    box-orient: vertical;
+    -webkit-line-clamp: 3;
+    line-clamp: 3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
