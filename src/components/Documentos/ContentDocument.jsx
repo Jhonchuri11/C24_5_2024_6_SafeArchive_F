@@ -6,7 +6,7 @@ import toast from "react-hot-toast";
 import Errors from "../Errors";
 import { IconButton, Tooltip } from "@mui/material";
 import { MdRemoveRedEye } from "react-icons/md";
-import { FaBan, FaChevronCircleLeft, FaChevronCircleRight,FaEdit, FaFileAlt, FaFileArchive, FaFileUpload, FaTrash } from "react-icons/fa";
+import { FaBan, FaCheck, FaChevronCircleLeft, FaChevronCircleRight,FaEdit, FaFileAlt, FaFileArchive, FaFileUpload, FaTrash } from "react-icons/fa";
 import DocumentPreviewModal from "../Asesor/DocumentPreviewModal;";
 import Swal from "sweetalert2";
 
@@ -25,10 +25,10 @@ const ContentDocument = () => {
     const fectchDocumentos = useCallback(async () => {
         setLoading(true);
         try {
-            const response = await api.get("/documentos", { params: { status: true } });
+            const response = await api.get("/documentos");
             const documentData = Array.isArray(response.data) ? response.data : [];
             setDocumentos(documentData);
-            console.log(documentData);
+            console.log(response);
             
         } catch (error) {
             setError(error.response.data.message);
@@ -83,22 +83,33 @@ const ContentDocument = () => {
         });
     };
 
-    const handleDisableDocumento = async (docId) => {
+    const handleDisableDocumento = async (docId, currentStatus) => {
+        
+        const confirmMessage = currentStatus ? "deshabilitar" : "habilitar";
+
         Swal.fire({
-            title: "Estás seguro?",
-            text: "Este documento se deshabilitará, pero lo puedes volver a habilitar.",
+            title: `Estás seguro de ${confirmMessage} este documento?`,
+            text: currentStatus
+                 ? "El documento se habilitará y estará disponible nuevamente"
+                 : "Este documento se deshabilitará, pero puedes volver a habilitarlo.",
             icon: "warning",
             showCancelButton: true,
-            confirmButtonText: "Sí, deshabilitar",
+            confirmButtonText: `Sí, ${confirmMessage}`,
             cancelButtonText: "No, cancelar",
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    await api.put(`/documentos/${docId}/deshabilitar`);
-                    setDocumentos(documentos.filter((doc) => doc.id !== docId));
-                    toast.success("El documento ha sido deshabilitado correctamente.");
+                    await api.put(`/documentos/${docId}/status?status=${!currentStatus}`);
+
+                    setDocumentos(documentos.map(doc =>
+                         doc.id === docId ? { ...doc, status: !currentStatus } : doc 
+                    ));
+
+                    toast.success(`Documento ${confirmMessage} correctamente.`);
+
                 } catch (error) {
                     console.error("Ocurrió un error al deshabilitar el documento", error);
+                    
                     toast.error("No se puede deshabilitar el documento.");
                 }
             }
@@ -188,30 +199,29 @@ const ContentDocument = () => {
                                 <div className="table-responsive d-flex flex-column align-items-center mt-4">
                                     
                                     
-                                    <table className="table table-hover table-bordered">
+                                    <table className="table table_document table-hover table-bordered">
                                         <thead>
                                             <tr className="rounded-top">
                                                 <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Título</b></th>
                                                 <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Autores</b></th>
-                                                <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Fecha de publicación</b></th>
+                                                <th className="tableheadercolor text-center py-1" style={{ width: "10%" }}><b>Fecha de publicación</b></th>
                                                 <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Categoria</b></th>
-                                                <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Tema</b></th>
-                                                <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Documento</b></th>
-                                                <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Fecha creado</b></th>
-                                                <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Fecha modificado</b></th>
-                                                <th className="tableheadercolor text-center py-1" style={{ width: "80px" }}><b>Acciones</b></th>
+                                                <th className="tableheadercolor text-center py-1" style={{ width: "1%" }}><b>Documento</b></th>
+                                                <th className="tableheadercolor text-center py-1" style={{ width: "10%" }}><b>Fecha creado</b></th>
+                                                <th className="tableheadercolor text-center py-1" style={{ width: "10%" }}><b>Fecha modificado</b></th>
+                                                <th className="tableheadercolor text-center py-1" style={{ width: "100px" }}><b>Acciones</b></th>
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {currentDocuments.map((doc, id) => (
-                                                <tr key={id}>
-                                                    <td>{doc.titulo}</td>
-                                                    <td>{doc.autores}</td>
-                                                    <td>{doc.fechaPublicacion}</td>
-                                                    <td>{doc.categoria ? doc.categoria.nombre_categoria : "N/A"}</td>
-                                                    <td>{doc.tema}</td>
-                                                    <td className="text-center py-2">
-
+                                            {currentDocuments.map((doc) => (
+                                                <tr 
+                                                key={doc.id}
+                                                className={doc.status ? 'row-enabled' : 'row-disabled' }>
+                                                    <td className={doc.status ? 'row-enabled' : 'row-disabled' }>{doc.titulo}</td>
+                                                    <td className={doc.status ? 'row-enabled' : 'row-disabled' }>{doc.autores}</td>
+                                                    <td className={doc.status ? 'row-enabled' : 'row-disabled' }>{doc.fechaPublicacion}</td>
+                                                    <td className={doc.status ? 'row-enabled' : 'row-disabled' }>{doc.nombreCategoria}</td>
+                                                    <td className={doc.status ? 'row-enabled' : 'row-disabled'}>
                                                         <Tooltip title="Ver documento">
                                                         
                                                             <IconButton onClick={() => handleViewDocument(doc.id)}>
@@ -219,13 +229,12 @@ const ContentDocument = () => {
                                                             </IconButton>
                                                      
                                                         </Tooltip>
-
                                                     </td>
-                                                    <td>{doc.created_at}</td>
-                                                    <td>{doc.updated_at}</td>
-                                                    <td className="text-center">
+                                                    <td className={doc.status ? 'row-enabled' : 'row-disabled' }>{doc.created_at}</td>
+                                                    <td className={doc.status ? 'row-enabled' : 'row-disabled' }>{doc.updated_at}</td>
+                                                    <td className={doc.status ? 'row-enabled' : 'row-disabled' }>
                                                         <Tooltip title="Ver detalle de documento">
-                                                            <Link to={`/documento-datos/${doc.id}`} style={{ margin: "0 10px" }}>
+                                                            <Link to={`/documento-datos/${doc.id}`} style={{ margin: "0 6px" }}>
                                                                 <IconButton>
                                                                     <MdRemoveRedEye color="#28AECE" />
                                                                 </IconButton>
@@ -238,14 +247,9 @@ const ContentDocument = () => {
                                                                 </IconButton>
                                                             </Link>
                                                         </Tooltip>
-                                                        <Tooltip title="Eliminar documento">
-                                                            <IconButton  onClick={() => handleDeleteDocumento(doc.id)} style={{ margin: "0 10px" }}>
-                                                                <FaTrash color="#E57373" />
-                                                            </IconButton>
-                                                        </Tooltip>
-                                                        <Tooltip title="Deshabilitar documento"> 
-                                                            <IconButton >
-                                                                <FaBan color="#28AECE" onClick={() => handleDisableDocumento(doc.id)}/>
+                                                        <Tooltip title={doc.status ? "Deshabilitar documento" : "Habilitar documento"}> 
+                                                            <IconButton onClick={() => handleDisableDocumento(doc.id, doc.status )} >
+                                                                {doc.status ? <FaBan color="#28AECE"/> : <FaCheck color="green"/> }
                                                             </IconButton>
                                                         </Tooltip>
                                                     </td>

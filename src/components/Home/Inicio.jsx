@@ -59,7 +59,7 @@ export default function Inicio() {
     const fetchDocumentos = useCallback(async (page = 0, limit = 10 ) => {
         setLoading(true);
         try {
-            const response = await api.get(`documentos/all/paginations`, { params: { page, limit }});
+            const response = await api.get(`/documentos/all/paginations`, { params: { page, limit }});
             const documentsData = Array.isArray(response.data) ? response.data : [];
 
             setDocumentos(documentsData);
@@ -186,8 +186,8 @@ export default function Inicio() {
                         >
                             <option value="">Todo el repositorio</option>
                             {categorias.map((catego) => (
-                                <option key={catego.categoria_id} value={catego.categoria_id}>
-                                    {catego.nombre_categoria}
+                                <option key={catego.id} value={catego.id}>
+                                    {catego.nombreCategoria}
                                 </option>
                             ))}
                         </select>
@@ -229,7 +229,6 @@ export default function Inicio() {
                                 <option value="autores">Autor</option>
                                 <option value="titulo">Título</option>
                                 <option value="asesor">Asesor</option>
-                                <option value="tema">Tema</option>
                             </select>
                         </div>
                         <div class="col-md-3">

@@ -8,7 +8,7 @@ export default function Login_user() {
 
 
    const gooogleLogin = () => {
-    window.location.href = `http://localhost:8081/oauth2/authorization/google`;
+    window.location.href = "http://localhost:8081/oauth2/authorization/google";
    }
     
     return (

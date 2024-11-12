@@ -22,7 +22,6 @@ export default function CreatedDocumento() {
     const [fechaPublicacion, setFechaPublicacion] = useState('');
     const [asesor, setAsesor] = useState('');
     const [categoria, setCategoria] = useState('');
-    const [tema, setTema] = useState('');
     const [carrera, setCarrera] = useState('');
     const [ciclo, setCiclo] = useState('');
     const [seccion, setSeccion] = useState('');
@@ -31,6 +30,10 @@ export default function CreatedDocumento() {
 
     // categorias de documentos
     const [categoriasList, setCategoriasList] = useState([]);
+
+    const [carrerasList, setCarrerasList] = useState([]);
+
+    const [semestressList, setSemestresList] = useState([]);
 
     const fetchCategoria = useCallback(async () => {
       setLoading(true);
@@ -52,6 +55,46 @@ export default function CreatedDocumento() {
       }
     }, []);
 
+    const fetchCarrera = useCallback(async () => {
+      setLoading(true);
+      try {
+        const response = await api.get("/carreras");
+
+        const carreraList = Array.isArray (response.data) ? response.data : [];
+
+        setCarrerasList(carreraList);;
+
+        // eliminar
+        console.log(carreraList);
+        
+      } catch (error) {
+        setError(error.response.data.message);
+        console.log("Error fetching categories", error);
+      } finally {
+        setLoading(false);
+      }
+    }, []);
+
+    const fetchSemestre = useCallback(async () => {
+      setLoading(true);
+      try {
+        const response = await api.get("/semestres");
+
+        const semestreList = Array.isArray (response.data) ? response.data : [];
+
+        setSemestresList(semestreList);;
+
+        // eliminar
+        console.log(semestreList);
+        
+      } catch (error) {
+        setError(error.response.data.message);
+        console.log("Error fetching categories", error);
+      } finally {
+        setLoading(false);
+      }
+    }, []);
+
 
     // Manejar el archivo PDF
     const handleFileChange = (event) => {
@@ -63,7 +106,7 @@ export default function CreatedDocumento() {
       event.preventDefault();
     
        // Verificar si los campos están vacíos
-      if (!titulo || !autores || !resumen || !fechaPublicacion || !asesor || !categoria || !tema || !file 
+      if (!titulo || !autores || !resumen || !fechaPublicacion || !asesor || !categoria || !file 
         || !carrera || !ciclo || !seccion || !semestre) {
         return toast.error("Todos los campos son obligatorios y debes subir un archivo.");
       }
@@ -77,7 +120,6 @@ export default function CreatedDocumento() {
       formData.append('fechaPublicacion', fechaPublicacion);
       formData.append('asesor', asesor);
       formData.append('categoria', categoria);
-      formData.append('tema', tema);
       formData.append('carrera', carrera);
       formData.append('ciclo', ciclo);
       formData.append('seccion', seccion);
@@ -111,7 +153,9 @@ export default function CreatedDocumento() {
     
     useEffect(() => {
       fetchCategoria();
-    }, [fetchCategoria])
+      fetchCarrera();
+      fetchSemestre();
+    }, [fetchCategoria, fetchCarrera, fetchSemestre])
 
     // to show and erros
     if (error) {
@@ -233,7 +277,7 @@ export default function CreatedDocumento() {
             <select
               className="form-control border border-grey-1"
               onChange={(e) => { setCategoria(e.target.value);
-                console.log('Categoria seleccionada:', e.target.value);
+                console.log('Categoria sele:', e.target.value);
                }
               }
               id="categoria"
@@ -242,8 +286,8 @@ export default function CreatedDocumento() {
             >
               <option value="">Seleccione una categoria</option>
               {categoriasList.map((cate) => (
-                <option key={cate.categoria_id} value={cate.categoria_id}>
-                  {cate.nombre_categoria}
+                <option key={cate.id} value={cate.id}>
+                  {cate.nombreCategoria}
                 </option>
               ))}
             </select>
@@ -252,37 +296,28 @@ export default function CreatedDocumento() {
         </div>
 
         <div className="col-6">
-          <label>TEMA<span className="text-danger">*</span></label>
-          <div className="input-group">
-            <div className="input-group-text">
-              <i className="bi bi-chat-square-text-fill"></i>
-            </div>
-            <input
-              type="text"
-              className="form-control border border-grey-1"
-              placeholder="Tema"
-              onChange={(e) => setTema(e.target.value)}
-              id="tema"
-              name="tema"
-              value={tema}
-            />
-          </div>
-        </div>
-        <div className="col-6">
           <label>CARRERA<span className="text-danger">*</span></label>
           <div className="input-group">
             <div className="input-group-text">
               <i className="bi bi-chat-square-text-fill"></i>
             </div>
-            <input
-              type="text"
+            <select
               className="form-control border border-grey-1"
-              placeholder="Ejemplo: Diseño y Desarrollo de Software"
-              onChange={(e) => setCarrera(e.target.value)}
+              onChange={(e) => { setCarrera(e.target.value);
+                console.log('Carrera sele:', e.target.value);
+               }
+              }
               id="carrera"
-              name="carrera"
+              name="carreraa"
               value={carrera}
-            />
+            >
+              <option value="">Seleccione una carrera</option>
+              {carrerasList.map((carre) => (
+                <option key={carre.id} value={carre.id}>
+                  {carre.nombreCarrera}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         <div className="col-6">
@@ -291,15 +326,23 @@ export default function CreatedDocumento() {
             <div className="input-group-text">
               <i className="bi bi-chat-square-text-fill"></i>
             </div>
-            <input
-              type="text"
+            <select
               className="form-control border border-grey-1"
-              placeholder="Ejemplo: I, II, III, IV, V, VI"
-              onChange={(e) => setCiclo(e.target.value)}
+              onChange={(e) => { setCiclo(e.target.value);
+                console.log('Ciclo sele:', e.target.value);
+               }
+              }
               id="ciclo"
               name="ciclo"
               value={ciclo}
-            />
+            >
+              <option value="I"> I</option>
+              <option value="II"> II</option>
+              <option value="III"> III</option>
+              <option value="IV">IV </option>
+              <option value="V">V</option>
+              <option value="VI">VI</option>
+            </select>
           </div>
         </div>
         <div className="col-6">
@@ -308,15 +351,24 @@ export default function CreatedDocumento() {
             <div className="input-group-text">
               <i className="bi bi-chat-square-text-fill"></i>
             </div>
-            <input
-              type="text"
+            <select
               className="form-control border border-grey-1"
-              placeholder="Ejemplo: A, B , C, D"
-              onChange={(e) => setSeccion(e.target.value)}
+              onChange={(e) => { setSeccion(e.target.value);
+                console.log('Seccion sele:', e.target.value);
+               }
+              }
               id="seccion"
               name="seccion"
               value={seccion}
-            />
+            >
+              <option value="">Seleccionar</option>
+              <option value="A">A</option>
+              <option value="B">B</option>
+              <option value="C">C</option>
+              <option value="D">D</option>
+              <option value="E">E</option>
+              <option value="E">F</option>
+            </select>
           </div>
         </div>
         <div className="col-6">
@@ -325,15 +377,23 @@ export default function CreatedDocumento() {
             <div className="input-group-text">
               <i className="bi bi-chat-square-text-fill"></i>
             </div>
-            <input
-              type="text"
+            <select
               className="form-control border border-grey-1"
-              placeholder="Ejemplo: 2024-1, 2024-2, 2023-2"
-              onChange={(e) => setSemestre(e.target.value)}
+              onChange={(e) => { setSemestre(e.target.value);
+                console.log('Semestre sele:', e.target.value);
+               }
+              }
               id="semestre"
               name="semestre"
               value={semestre}
-            />
+            >
+              <option value="">Seleccione un semestre</option>
+              {semestressList.map((seme) => (
+                <option key={seme.seme} value={seme.id}>
+                  {seme.nombreSemestre}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         <div className="col-sm-6 mb-3">

@@ -98,7 +98,7 @@ const ItemDocumento = () => {
                     <div className="row mb-4">
                         <div className="col-md-6">
                             <strong>CORREO</strong>
-                            <p></p>
+                            <p>{documentos.nombreUsuario}</p>
                         </div>
                         <div className="col-md-6">
                             <strong>NOMBRES Y APELLIDOS</strong>
@@ -109,6 +109,10 @@ const ItemDocumento = () => {
                     <hr/>
                     <h6 className="mb-3 text-info">Detalle del documento</h6>
                     <div className="row mb-4">
+                         <div className="col-md-6">
+                            <strong>CATEGORIA</strong>
+                            <p>{documentos.nombreCategoria}</p>
+                        </div>
                         <div className="col-md-6">
                             <strong>TITULO</strong>
                             <p>{documentos.titulo}</p>
@@ -116,10 +120,6 @@ const ItemDocumento = () => {
                         <div className="col-md-6">
                             <strong>AUTORES</strong>
                             <p>{documentos.autores}</p>
-                        </div>
-                        <div className="col-md-6">
-                            <strong>TEMA</strong>
-                            <p>{documentos.tema}</p>
                         </div>
                         <div className="col-md-6">
                             <strong>FECHA DE PUBLICACIÓN</strong>
@@ -133,7 +133,7 @@ const ItemDocumento = () => {
                     <div className="row mb-4">
                         <div className="col-md-6">
                             <strong>CARRERA</strong>
-                            <p>{documentos.carrera}</p>
+                            <p>{documentos.nombreCarrera}</p>
                         </div>
                         <div className="col-md-6">
                             <strong>CICLO</strong>
@@ -145,7 +145,7 @@ const ItemDocumento = () => {
                         </div>
                         <div className="col-md-6">
                             <strong>SEMESTRE</strong>
-                            <p>{documentos.semestre}</p>
+                            <p>{documentos.nombreSemestre}</p>
                         </div>
                     </div>
                     <div className="col-12">
