@@ -56,7 +56,7 @@
 }
 
 .student-table th {
-    background-color: #007bff;
+    background-color: #28AECE;
     color: white;
     font-weight: bold;
 }
@@ -101,16 +101,16 @@
 
 .view-link {
     padding: 6px 12px;
-    color: #007bff;
+    color: #28AECE;
     text-decoration: none;
-    border: 1px solid #007bff;
+    border: 1px solid #28AECE;
     border-radius: 4px;
     font-size: 14px;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .view-link:hover {
-    background-color: #007bff;
+    background-color:#28AECE;
     color: white;
 }
 
@@ -138,7 +138,7 @@
 }
 
 .student-page-button.student-active {
-    background-color: #007bff;
+    background-color: #28AECE;
     color: white;
     cursor: default;
 }

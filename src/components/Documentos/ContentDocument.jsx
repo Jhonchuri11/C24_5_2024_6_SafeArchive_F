@@ -20,7 +20,7 @@ const ContentDocument = () => {
 
     // paginacion para tabla
     const [currentPage, setCurrentPage] = useState(1);
-    const documentsPerPage = 2;
+    const documentsPerPage = 5;
 
     const fectchDocumentos = useCallback(async () => {
         setLoading(true);
@@ -90,8 +90,8 @@ const ContentDocument = () => {
         Swal.fire({
             title: `Estás seguro de ${confirmMessage} este documento?`,
             text: currentStatus
-                 ? "El documento se habilitará y estará disponible nuevamente"
-                 : "Este documento se deshabilitará, pero puedes volver a habilitarlo.",
+                 ? "Este documento se deshabilitará, pero puedes volver a habilitarlo."
+                 : "El documento se habilitará y estará disponible nuevamente",
             icon: "warning",
             showCancelButton: true,
             confirmButtonText: `Sí, ${confirmMessage}`,
@@ -187,13 +187,11 @@ const ContentDocument = () => {
                                 </div>
                             </div>
                         </div>
-                        <div className="mt-4">
-                            <Link to="/documentos-deshabilitados" className="box_header_1 btn px-4 me-2" >Ver documentos deshabilitados</Link>
-                        </div>
                         <div className="box_block mt-3">
                             <div className="card-header box_header_1 py-2">
                                 <span>LISTADO DE DOCUMENTO</span>
                             </div>
+                            
                             <div className="card card-body rounded-0 border-0 ">
                                 
                                 <div className="table-responsive d-flex flex-column align-items-center mt-4">

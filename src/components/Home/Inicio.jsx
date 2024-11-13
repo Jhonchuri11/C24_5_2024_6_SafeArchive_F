@@ -4,6 +4,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
+import Skeleton from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css';
+import DocumentSkeleton from '../Skeleton/DocumentSkeleton';
+//import 'react-loading-skeleton/dist/Skeleton';
+
 
 export default function Inicio() {
 
@@ -11,6 +16,12 @@ export default function Inicio() {
     const [categoria, setCategoria] = useState('');
 
     const [resumen, setResumen] = useState('');
+
+    const [sugerencias, setSugerencias] = useState([]);
+
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    const [effect, setEffect] = useState("wave");
 
     // filtros avanzados
     const [filtrosAvanzados, setFiltrosAvanzados] = useState([{ campo: '', condicion: 'contiene', valor: '' }]);
@@ -23,7 +34,8 @@ export default function Inicio() {
     const [documentos, setDocumentos] = useState([]);
 
 
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
+
     const [errorr, setError] = useState(false);
 
     // tipo de documento categorias
@@ -56,13 +68,16 @@ export default function Inicio() {
         }
     }, []);
 
-    const fetchDocumentos = useCallback(async (page = 0, limit = 10 ) => {
-        setLoading(true);
+    const fetchDocumentos = useCallback(async (page = 0, limit = 5 ) => {
+      
         try {
+            setLoading(true);
             const response = await api.get(`/documentos/all/paginations`, { params: { page, limit }});
             const documentsData = Array.isArray(response.data) ? response.data : [];
 
             setDocumentos(documentsData);
+
+            setLoading(false);
 
             // total documentos
             setTotalDocuments(parseInt(response.headers['x-total-count'], 10));
@@ -70,9 +85,8 @@ export default function Inicio() {
         } catch (err) {
             setError(err?.response?.data?.message);
             toast.error("Error fetching documentos", err);
-        } finally {
-            setLoading(false);
-        }
+        } 
+
     }, []);
 
     useEffect(() => {
@@ -80,22 +94,25 @@ export default function Inicio() {
         fetchCategorias();
     }, [fetchDocumentos, fetchCategorias, currentPage]);
 
-    // funcion start busqueda basica
-    const handleSearchBasic = async () => {
-        try {
-            const params = {};
-            if (categoria) params.categoria = categoria;
-            if (resumen) params.resumen = resumen;
-            
-            const response = await 
-            api.get(`documentos/search`, { params });
-            setDocumentos(response.data);
-            console.log(response);
-
-        } catch (error) {
-            console.error("Error fetching documents:", error);
-        }
-    }
+     // Manejo de búsqueda básica con retraso de Skeleton
+     const handleSearchBasic = async () => {
+        setLoading(true); // Activar Skeleton al iniciar la búsqueda
+        setTimeout(async () => {
+            try {
+                const params = {};
+                if (categoria) params.categoria = categoria;
+                if (resumen) params.resumen = resumen;
+                
+                const response = await api.get(`documentos/search`, { params });
+                setDocumentos(response.data);
+                setTotalDocuments(response.data.length);
+                setLoading(false); // Desactivar Skeleton después de recibir los datos
+            } catch (error) {
+                console.error("Error fetching documents:", error);
+                //setLoading(false);
+            }
+        }, 5000); // 5 segundos de retraso para mostrar el Skeleton
+    };
 
     // funcion paginacion
     const handlePageChange = (pageNumber) => {
@@ -105,53 +122,62 @@ export default function Inicio() {
 
     // start andvanc filters
     const aplicarFiltros = async () => {
-        try {
-            const params = {
-            };
+        setLoading(true);
+        setTimeout( async () => {
+            try {
+                const params = {
+                };
+    
+                if (categoria) params.categoria = categoria;
+                if (resumen) params.resumen = resumen;
+                
+                filtrosAvanzados.forEach((filtro) => {
+                    params[`campos`] = encodeURIComponent(filtro.campo);
+                    params[`condiciones`] = encodeURIComponent(filtro.condicion);
+                    params[`valores`] = encodeURIComponent(filtro.valor);
+               });
+    
+                const response = await api.get(`documentos/search/advanced`, { params })
+    
+                setDocumentos(response.data);
+                setTotalDocuments(response.data.length);
+                
+                console.log(response);
+    
+            } catch (error) {
+                console.log("Error en obtener documentos por filtes", error);
+            } finally {
+                setLoading(false);
+            }    
+        }, 5000);
+        
+    }
 
-            
-            if (categoria) params.categoria = categoria;
-            if (resumen) params.resumen = resumen;
-            //if (filtrosAvanzados) params.filtrosAvanzados = filtrosAvanzados; 
-            // Procesar filtros avanzados
 
-            
-            
-            filtrosAvanzados.forEach((filtro) => {
-                params[`campos`] = encodeURIComponent(filtro.campo);
-                params[`condiciones`] = encodeURIComponent(filtro.condicion);
-                params[`valores`] = encodeURIComponent(filtro.valor);
-           });
-           
-
-           /*
-           filtrosAvanzados.forEach((filtro) => {
-            params.campos.push(encodeURIComponent(filtro.campo));
-            params.condiciones.push(encodeURIComponent(filtro.condicion));
-            params.valores.push(encodeURIComponent(filtro.valor));
-           })
-            */
-           
-
-            const response = await api.get(`documentos/search/advanced`, { params })
-
-            setDocumentos(response.data);
-            
-            console.log(response);
-
-        } catch (error) {
-            console.log("Error en obtener documentos por filtes", error);
+    const handleBusquedaChange = async (e) => {
+        setResumen(e.target.value);
+        if (e.target.value.length > 2) {
+            try {
+                const response = await api.get(`/documentos/suggestions`, { params: { resumen: e.target.value } });
+                setSugerencias(response.data);
+                setShowSuggestions(true);
+            } catch (error) {
+                console.log("Error fetching sugerencias:", error);
+            }
+        } else {
+            setShowSuggestions(false);
         }
     }
+
+    const handleSuggestionClick = (suggestion) => {
+        setResumen(suggestion); // Llena el input con la sugerencia seleccionada
+        setShowSuggestions(false); // Oculta las sugerencias
+    };
 
     const handleCategoriaChange = (e) => {
         setCategoria(e.target.value);
 
     };
-
-    const handleBusquedaChange = (e) => {
-        setResumen(e.target.value);
-    }
 
     const cambioEstado = () => {
         setMostrarFiltros(!mostrarFiltros);
@@ -201,8 +227,8 @@ export default function Inicio() {
                             <button class="btn btn-outline-secondary" onClick={(e)=> handleSearchBasic(e)} type="button" >
                                 <i className="bi bi-search"></i>
                             </button>
-
                         </div>
+
                     </div>
                     <div className="col-md-2">
                         <button class="btn btn-link"  onClick={cambioEstado}>
@@ -220,6 +246,7 @@ export default function Inicio() {
                 <div id="contenedor">
 
                     {filtrosAvanzados.map((filtro, index) => 
+
                     <div className="row elemento" key={index}>
                         <div className="col-md-3">
                             <select class="form-select border border-grey-1" aria-label="Campo" 
@@ -275,31 +302,40 @@ export default function Inicio() {
                     Mostrando items {currentPage * 10 + 1 }-
                     {Math.min((currentPage + 1 ) * 10, totalDocuments)} de {totalDocuments}
                 </p>
-                <div className="row">
-                    { documentos.map((documento, index) => (
-                    
-                    <div className="row" key={index}>
-                        <div className="col-md-3 mt-4">
-                            <Link to={`/detalle/${documento.id}`}>
-                            <img
-                            className="imgdocumento" 
-                            src={documento.thumbnailUrl} alt={`${documento.titulo}`}
-                            width={"240px"} 
-                            height={"240px"} 
-                            />
-                            </Link>
-                        </div>
-                        <div className="col-md-9 mt-4">
-                            <Link to={`/detalle/${documento.id}`} className='documento'>{documento.titulo} </Link>
-                            <p>{documento.autores}</p>
-
-                            <p className="texto-resumen text-justify">
-                                {documento.resumen}
-                            </p>
-
-                        </div> 
-                    </div>
-                    ))}
+                <div>
+                
+            </div>
+            <div className="row">
+                    {loading ? (
+                        Array(10).fill().map((_, index) => <DocumentSkeleton key={index} />)
+                    ) : (
+                        documentos.map((documento, index) => (
+                            <div className="row" key={index}>
+                                <div className="col-md-3 mt-4">
+                                    <Link to={`/detalle/${documento.id}`}>
+                                        {documento.thumbnailUrl ? (
+                                            <img
+                                                className="imgdocumento"
+                                                src={documento.thumbnailUrl}
+                                                alt={`${documento.titulo}`}
+                                                width={"240px"}
+                                                height={"240px"}
+                                            />
+                                        ) : (
+                                            <Skeleton width={240} height={340} />
+                                        )}
+                                    </Link>
+                                </div>
+                                <div className="col-md-9 mt-4">
+                                    <Link to={`/detalle/${documento.id}`} className='documento'>{documento.titulo}</Link>
+                                    <p>{documento.autores}</p>
+                                    <p className="texto-resumen text-justify">
+                                        {documento.resumen}
+                                    </p>
+                                </div>
+                            </div>
+                        ))
+                    )}
                 </div>
 
                 <nav aria-label="Page navigation">

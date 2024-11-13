@@ -19,7 +19,7 @@ const StudentList = () => {
                 const data = await fetchStudents();
                 const studentsWithRoles = data.map(student => ({
                     ...student,
-                    rol: student.role_id 
+                    rol: student.id 
                 }));
                 setStudents(studentsWithRoles);
             } catch (error) {
@@ -55,7 +55,7 @@ const StudentList = () => {
     };
 
     const filteredStudents = students.filter(student =>
-        student.correoCorporativo.toLowerCase().includes(searchTerm.toLowerCase())
+        student.correo_corporativo.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const indexOfLastStudent = currentPage * studentsPerPage;
@@ -111,22 +111,23 @@ const StudentList = () => {
             <table className="student-table">
                 <thead>
                     <tr>
-                        <th>Usuarios</th>
-                        <th>Selección</th>
-                        <th>Cambiar</th>
-                        <th>Rol</th>
+                        <th className='text-center'>Usuarios</th>
+                        <th className='text-center'>Selección</th>
+                        <th className='text-center'>Acción</th>
+                        <th className='text-center'>Rol</th>
                     </tr>
                 </thead>
                 <tbody>
                     {currentStudents.map(student => (
-                        <tr key={student.userId}>
-                            <td>{student.correoCorporativo}</td>
+                        <tr key={student.id}>
+                            <td>{student.correo_corporativo
+                            }</td>
                             <td>
                                 <select
                                     className="select-role"
-                                    value={selectedRole[student.userId] || ''}
+                                    value={selectedRole[student.id] || ''}
                                     onChange={(e) => {
-                                        setSelectedRole({ ...selectedRole, [student.userId]: e.target.value });
+                                        setSelectedRole({ ...selectedRole, [student.id]: e.target.value });
                                     }}
                                 >
                                     <option value="">Seleccionar rol</option>
@@ -138,13 +139,13 @@ const StudentList = () => {
                             <td>
                                 <button 
                                     className="role-button" 
-                                    onClick={() => handleChangeRole(student.userId)}
+                                    onClick={() => handleChangeRole(student.id)}
                                 >
                                     Cambiar rol
                                 </button>
                             </td>
                             <td>
-                                {student.rol}
+                                {student.role_nombre}
                             </td>
                         </tr>
                     ))}

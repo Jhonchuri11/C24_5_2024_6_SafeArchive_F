@@ -26,6 +26,8 @@ import ListaReportes from './components/Reportes/ListaReportes';
 import DocumentoDetails from './components/Documentos/DocumentoDetails';
 import ItemDocumento from './components/Documentos/ItemDocumento';
 import ListDisableDocument from './components/Documentos/ListDisableDocument';
+import { SkeletonTheme } from 'react-loading-skeleton';
+import 'react-loading-skeleton/dist/skeleton.css'
 
 function MainLayout( { children }) {
   return (
@@ -46,6 +48,7 @@ export default function App() {
 
   return (
     <>
+    <SkeletonTheme baseColor="#eaeaea" highlightColor="#ccc">
       <BrowserRouter>
         <Routes>
           {/* Rutas públicas */}
@@ -206,6 +209,7 @@ export default function App() {
 
         </Routes>
       </BrowserRouter>
+      </SkeletonTheme>
     </>
   );
 }

@@ -5,6 +5,10 @@ import "../../style/ContentDocument.css";
 import {toast} from "react-hot-toast";
 import api from "../../services/api";
 import Errors from "../Errors";
+import * as Yup from "yup";
+import { Formik, Field, Form, ErrorMessage } from "formik";
+import Swal from "sweetalert2";
+
 
 
 export default function CreatedDocumento() {
@@ -101,17 +105,39 @@ export default function CreatedDocumento() {
       setFile(event.target.files[0]);
     };
 
+    const validationSchema = Yup.object({
+      titulo: Yup.string().required("El título es obligatorio"),
+      autores: Yup.string().required("El autor es obligatorio"),
+      resumen: Yup.string().required("El resumen es obligatorio"),
+      fechaPublicacion: Yup.date().required("La fecha de publicación es obligatoria"),
+      asesor: Yup.string().required("El asesor es obligatorio"),
+      categoria: Yup.string().required("La categoría es obligatoria"),
+      carrera: Yup.string().required("La carrera es obligatoria"),
+      ciclo: Yup.string().required("El ciclo es obligatorio"),
+      semestre: Yup.string().required("El semestre es obligatorio"),
+      seccion: Yup.string(), // opcional
+      file: Yup.mixed()
+        .required("Debes subir un archivo")
+        .test("fileSize", "El archivo es muy grande, debe ser menor de 20MB", (value) =>
+          value ? value.size <= 20 * 1024 * 1024 : true
+        )
+        .test("fileFormat", "Solo se permiten archivos PDF", (value) =>
+          value ? value.type === "application/pdf" : true
+        ),
+    });
+
     // Manejar el envío del formulario
-    const handleSubmit = async (event) => {
-      event.preventDefault();
-    
-       // Verificar si los campos están vacíos
-      if (!titulo || !autores || !resumen || !fechaPublicacion || !asesor || !categoria || !file 
-        || !carrera || !ciclo || !seccion || !semestre) {
-        return toast.error("Todos los campos son obligatorios y debes subir un archivo.");
-      }
+    const handleSubmit = async (values) => {
+      const formData = new FormData();
+      Object.keys(values).forEach((key) => {
+        formData.append(key, values[key]);
+      });
+      
+
+      
 
       // Crear un objeto FormData para enviar los datos
+      /*
       const formData = new FormData();
       formData.append('file', file); 
       formData.append('titulo', titulo);
@@ -124,23 +150,40 @@ export default function CreatedDocumento() {
       formData.append('ciclo', ciclo);
       formData.append('seccion', seccion);
       formData.append('semestre', semestre);
+      */
 
       try {
         setLoading(true)
-        // enviamos solicitud
         const response = await api.post('/documentos/uploaddrive', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
         });
-        toast.success("Documento create successsful");
+
+        Swal.fire({
+          title: "Registro de documento exitoso",
+          text: "El documento ha sido registrado correctamente.",
+          icon: "success",
+          confirmButtonText: "Aceptar"
+        }).then((result) => {
+          if (result.isConfirmed) {
+            navigate("/documentos");
+          }
+        })
+
         navigate("/documentos");
 
         console.log('Documento subido con éxito:', response);
+
       } catch (error) {
         setError(error.response.data.message);
         console.error("Error al subir el documento:", error);
-        toast.error("Error creating document");
+        Swal.fire({
+          title: "Error",
+          text: "Ocurrió un error al intentar registrar el documento!",
+          icon: "error",
+          confirmButtonText: "Aceptar"
+        });
       } finally {
         setLoading(false);
       }
@@ -159,7 +202,9 @@ export default function CreatedDocumento() {
 
     // to show and erros
     if (error) {
-      return <Errors message={error} />
+      return <Errors message={error} />;
+
+    
   }
 
     return (
@@ -177,245 +222,253 @@ export default function CreatedDocumento() {
                 </div>
   <hr />
   <div className="card card-body bg-light p-4 shadow rounded">
-    <form onSubmit={handleSubmit} 
+    <Formik
+    initialValues={{
+      titulo: "",
+      autores: "",
+      resumen: "",
+      fechaPublicacion: "",
+      asesor: "",
+      categoria: "",
+      carrera: "",
+      ciclo: "",
+      semestre: "",
+      seccion: "",
+      file: null,
+    }}
+    validationSchema={validationSchema}
+    onSubmit={handleSubmit}>
+
+      {({ setFieldValue, values, handleChange }) => (
+
+    <Form
     encType="multipart/form-data" className="formulario">
       <div className="row g-4">
         <div className="col-6">
-          <label>TITULO<span className="text-danger">*</span></label>
+          <label>Título<span className="text-danger">*</span></label>
           <div className="input-group">
             <div className="input-group-text">
               <i className="bi bi-chat-right-dots"></i>
             </div>
-            <input
-              type="text"
-              className="form-control border border-grey-1"
-              onChange={(e) => setTitulo(e.target.value)}
-              id="titulo"
-              name="titulo"
-              value={titulo}
-              placeholder="Título"
+            <Field
+            as="textarea"
+             name="titulo"
+            className="form-control border border-grey-1"
+            placeholder="Título"
             />
           </div>
+          <ErrorMessage name="titulo" component="div" className="text-danger" />
         </div>
 
         <div className="col-6">
-          <label>AUTORES<span className="text-danger">*</span></label>
+          <label>Autores<span className="text-danger">*</span></label>
           <div className="input-group">
             <div className="input-group-text">
               <i className="bi bi-person-lines-fill"></i>
             </div>
-            <input
-              type="text"
+            <Field
+            as="textarea" 
               className="form-control border border-grey-1"
               placeholder="Nombres y apellidos"
-              onChange={(e) => setAutores(e.target.value)}
               id="autores"
               name="autores"
-              value={autores}
             />
           </div>
+          <ErrorMessage name="autores" component="div" className="text-danger"/>
         </div>
 
         <div className="col-12">
-          <label>RESUMEN<span className="text-danger">*</span></label>
+          <label>Resumen<span className="text-danger">*</span></label>
           <div className="input-group">
             <div className="input-group-text">
               <i className="bi bi-card-text"></i>
             </div>
-            <textarea
+            <Field
+            as="textarea" 
               className="form-control border border-grey-1"
               placeholder="Resumen"
-              onChange={(e) => setResumen(e.target.value)}
               id="resumen"
               name="resumen"
-              value={resumen}
-            ></textarea>
+            ></Field>
           </div>
+          <ErrorMessage name="resumen" component="div" className="text-danger"/>
         </div>
 
         <div className="col-6">
-          <label>FECHA DE PUBLICACIÓN<span className="text-danger">*</span></label>
+          <label>Fecha de publicación<span className="text-danger">*</span></label>
           <div className="input-group">
             <div className="input-group-text">
               <i className="bi bi-calendar2-day"></i>
             </div>
-            <input
-              type="Date"
+            <Field
+              type="date"
               className="form-control border border-grey-1"
-              onChange={(e) => setFechaPublicacion(e.target.value)}
               id="fechaPublicacion"
               name="fechaPublicacion"
-              value={fechaPublicacion}
             />
           </div>
+          <ErrorMessage name="fechaPublicacion" component="div" className="text-danger" />
         </div>
 
         <div className="col-6">
-          <label>ASESOR<span className="text-danger">*</span></label>
+          <label>Asesor<span className="text-danger">*</span></label>
           <div className="input-group">
             <div className="input-group-text">
               <i className="bi bi-person-fill"></i>
             </div>
-            <input
+            <Field
               type="text"
               className="form-control border border-grey-1"
               placeholder="Nombres y apellidos"
-              onChange={(e) => setAsesor(e.target.value)}
               id="asesor"
               name="asesor"
-              value={asesor}
             />
           </div>
+          <ErrorMessage name="asesor" component="div" className="text-danger"/>
         </div>
 
         <div className="col-6">
-          <label>CATEGORIA<span className="text-danger">*</span></label>
+          <label>Categoria<span className="text-danger">*</span></label>
           <div className="input-group">
             <div className="input-group-text">
               <i className="bi bi-bookmark-star"></i>
             </div>
-            <select
-              className="form-control border border-grey-1"
-              onChange={(e) => { setCategoria(e.target.value);
-                console.log('Categoria sele:', e.target.value);
-               }
-              }
+            <Field
+            as="select"
+              className="form-select border border-grey-1 border border-grey-1" aria-label="Default select example"
               id="categoria"
               name="categoria"
-              value={categoria}
             >
-              <option value="">Seleccione una categoria</option>
+              <option value="">Seleccionar categoria</option>
               {categoriasList.map((cate) => (
                 <option key={cate.id} value={cate.id}>
                   {cate.nombreCategoria}
                 </option>
               ))}
-            </select>
+            </Field>
             
           </div>
+          <ErrorMessage name="categoria" component="div" className="text-danger" />
         </div>
 
         <div className="col-6">
-          <label>CARRERA<span className="text-danger">*</span></label>
+          <label>Carrera<span className="text-danger">*</span></label>
           <div className="input-group">
             <div className="input-group-text">
               <i className="bi bi-chat-square-text-fill"></i>
             </div>
-            <select
-              className="form-control border border-grey-1"
-              onChange={(e) => { setCarrera(e.target.value);
-                console.log('Carrera sele:', e.target.value);
-               }
-              }
+            <Field
+            as="select"
+              className="form-select border border-grey-1"
               id="carrera"
-              name="carreraa"
-              value={carrera}
+              name="carrera"
             >
-              <option value="">Seleccione una carrera</option>
+              <option value="">Seleccionar carrera</option>
               {carrerasList.map((carre) => (
                 <option key={carre.id} value={carre.id}>
                   {carre.nombreCarrera}
                 </option>
               ))}
-            </select>
+            </Field>
           </div>
+          <ErrorMessage name="carrera" component="div" className="text-danger" />
         </div>
         <div className="col-6">
-          <label>CICLO<span className="text-danger">*</span></label>
+          <label>Ciclo<span className="text-danger">*</span></label>
           <div className="input-group">
             <div className="input-group-text">
               <i className="bi bi-chat-square-text-fill"></i>
             </div>
-            <select
-              className="form-control border border-grey-1"
-              onChange={(e) => { setCiclo(e.target.value);
-                console.log('Ciclo sele:', e.target.value);
-               }
-              }
+            <Field
+            as="select"
+              className="form-select border border-grey-1"
               id="ciclo"
               name="ciclo"
-              value={ciclo}
             >
-              <option value="I"> I</option>
-              <option value="II"> II</option>
-              <option value="III"> III</option>
-              <option value="IV">IV </option>
-              <option value="V">V</option>
-              <option value="VI">VI</option>
-            </select>
+              <option value="">Seleccionar ciclo</option>
+              <option value="I">1</option>
+              <option value="II">2</option>
+              <option value="III">3</option>
+              <option value="IV">4</option>
+              <option value="V">5</option>
+              <option value="VI">6</option>
+            </Field>
           </div>
+          <ErrorMessage name="ciclo" component="div" className="text-danger" />
         </div>
         <div className="col-6">
-          <label>SECCIÓN<span className="text-danger">*</span></label>
+          <label>Sección<span className="text-danger">*</span></label>
           <div className="input-group">
             <div className="input-group-text">
               <i className="bi bi-chat-square-text-fill"></i>
             </div>
-            <select
-              className="form-control border border-grey-1"
-              onChange={(e) => { setSeccion(e.target.value);
-                console.log('Seccion sele:', e.target.value);
-               }
-              }
+            <Field
+            as="select"
+              className="form-select border border-grey-1"
               id="seccion"
               name="seccion"
-              value={seccion}
             >
-              <option value="">Seleccionar</option>
+              <option value="">Seleccionar sección</option>
               <option value="A">A</option>
               <option value="B">B</option>
               <option value="C">C</option>
               <option value="D">D</option>
               <option value="E">E</option>
               <option value="E">F</option>
-            </select>
+            </Field>
           </div>
+          <ErrorMessage name="seccion" component="div" className="text-danger" />
         </div>
         <div className="col-6">
-          <label>SEMESTRE<span className="text-danger">*</span></label>
+          <label>Semestre<span className="text-danger">*</span></label>
           <div className="input-group">
             <div className="input-group-text">
               <i className="bi bi-chat-square-text-fill"></i>
             </div>
-            <select
-              className="form-control border border-grey-1"
-              onChange={(e) => { setSemestre(e.target.value);
-                console.log('Semestre sele:', e.target.value);
-               }
-              }
+            <Field
+            as="select"
+              className="form-select border border-grey-1"
               id="semestre"
               name="semestre"
-              value={semestre}
             >
-              <option value="">Seleccione un semestre</option>
+              <option value="">Seleccionar semestre</option>
               {semestressList.map((seme) => (
                 <option key={seme.seme} value={seme.id}>
                   {seme.nombreSemestre}
                 </option>
               ))}
-            </select>
+            </Field>
           </div>
+          <ErrorMessage name="semestre" component="div" className="text-danger" />
         </div>
         <div className="col-sm-6 mb-3">
-          <label htmlFor="formFile" className="form-label">Archivo pdf:</label>
+          <label htmlFor="formFile" className="form-label">Archivo<span className="text-danger">*</span> </label>
           <input
            className="form-control border border-grey-1" 
            type="file" 
-           id="file" onChange={handleFileChange} accept="application/pdf" />
+           id="file" 
+           accept="application/pdf"
+           onChange={(e) => {
+            setFieldValue("file", e.currentTarget.files[0]);
+          }} />
+           <ErrorMessage name="file" component="div" className="text-danger" />
         </div>
 
         <div className="col-12">
           <button
           disabled={loading} className="btn btn-info px-4 float-end mt-4 me-2">
-            { loading ? <span>Loading...</span> : " Crear documento" }
+            { loading ? <span>Loading...</span> : " Registrar documento" }
           </button>
       
           <Link to={'/documentos'} className="btn btn-success px-4 float-end mt-4 me-2">Cancelar</Link>
           
         </div>
       </div>
-    </form>
+    </Form>
+    )}
+    </Formik>
   </div>
+  <div className="mt-3"/>
 </section>
 
     )

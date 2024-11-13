@@ -1,0 +1,11 @@
+.card-skeleton {
+    display: flex;
+}
+
+.card-skeleton .left-col {
+    margin-right: 1rem;
+}
+
+.card-skeleton .right-col {
+    flex: 1;
+}

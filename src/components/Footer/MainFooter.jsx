@@ -9,7 +9,7 @@ export default function MainFooter() {
    
    return (
     <footer className="footer_p bg-dark text-white py-4">
-        <div className="container">
+        <div className="container mt-4">
           <div className="row align-items-center">
             <div className="col-md-8">
               <span className="me-3">Copyright © 2024</span>

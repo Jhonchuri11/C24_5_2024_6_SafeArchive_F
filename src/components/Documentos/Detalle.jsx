@@ -3,6 +3,7 @@ import doctesis from '../../assets/images/doc_tesis.png';
 import { useParams } from "react-router-dom";
 import api from "../../services/api";
 import toast from "react-hot-toast";
+import Skeleton from "react-loading-skeleton";
 export default function Detalle() {
 
     const [ loading, setLoading] = useState(false);
@@ -12,6 +13,8 @@ export default function Detalle() {
     const [documento, setDocumento] = useState(null);
 
     const [error, setError] = useState(null);
+
+    const [imageLoaded, setImageLoaded] = useState(false);
 
 
     // utilizamos el endpont para listar un documento por su id
@@ -58,6 +61,10 @@ export default function Detalle() {
     }
 
 
+    const handleImageLoad = () => {
+        setImageLoaded(true);
+    };
+
     useEffect(() => {
         fetchDocumentosDetails();
     }, [fetchDocumentosDetails]);
@@ -77,7 +84,18 @@ export default function Detalle() {
             <div className="container mt-3">
                 <div className="row">
                     <div className="col-md-3 mt-4">
-                        <img className="imgdocumento" src={documento.thumbnailUrl} alt={`${documento.titulo}`}width={"240px"} height={"240px"}/>
+
+                        {!imageLoaded && <Skeleton width={240} height={340} />}
+                        <img 
+                        className="imgdocumento" 
+                        src={documento.thumbnailUrl || doctesis} 
+                        alt={`${documento.titulo}`} 
+                        width={"240px"} 
+                        height={"240px"}
+                        onLoad={handleImageLoad}
+                        style={{ display: imageLoaded ? 'block' : 'none' }}/>
+                        
+
                         <p class="mt-4">Ver y descargar documento</p>
 
                         <button onClick={handleDowload}  className="btn btn-info documento">Descargar documento</button>
@@ -90,9 +108,9 @@ export default function Detalle() {
                         <h4>RESUMEN</h4>
                     <p class="resumen">{documento.resumen}</p>
                     <div className="mt-2">
-                        <h4>Temas</h4>
+                        <h4>Carrera</h4>
                         <p>
-                            {documento.tema}
+                            {documento.nombreCarrera}
                             <br/>
                         </p>
                     </div>

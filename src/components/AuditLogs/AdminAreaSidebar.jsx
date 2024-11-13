@@ -68,20 +68,6 @@ export default function Sidebar() {
                     </Link>
                 </Tooltip>
 
-                <Tooltip title={`${openSidebar ? "" : "Documento"}`}>
-                    <Link
-                        to="/admin/documento"
-                        className={`d-flex align-items-center text-white py-2 px-3 rounded ${
-                            pathName.startsWith("/admin/documento") ? "bg-btnColor" : "bg-transparent"
-                        } hover-bg-btnColor`}
-                    >
-                        <LiaBlogSolid className="fs-4 me-2" />
-                        <span className={`fw-semibold ${!openSidebar ? "d-none" : ""}`}>
-                            Documento
-                        </span>
-                    </Link>
-                </Tooltip>
-
             </div>
         </div>
     );

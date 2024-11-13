@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import api from "../../services/api";
 import toast from "react-hot-toast";
 import Errors from "../Errors";
+import Swal from "sweetalert2";
 
 
 const DocumentoDetails = () => {
@@ -20,6 +21,10 @@ const DocumentoDetails = () => {
 
     // categorias de documentos
     const [categories, setCategories] = useState([]);
+
+    const [carreras, setCarreras] = useState([]);
+
+    const [semestres, setSemestres] = useState([]);
 
 
     const fectchDocumentosDetails = useCallback(async () => {
@@ -63,6 +68,48 @@ const DocumentoDetails = () => {
         }
       }, []);
 
+      const fetchCarreras = useCallback(async () => {
+        setLoading(true);
+        try {
+          const response = await api.get("/carreras");
+  
+          const carreraList = Array.isArray (response.data) ? response.data : [];
+  
+          setCarreras(carreraList);;
+  
+          // eliminar
+          console.log(carreraList);
+          
+        } catch (error) {
+          setError(error.response.data.message);
+          toast.error("Error fetching categories.");
+          console.log("Error fetching categories", error);
+        } finally {
+          setLoading(false);
+        }
+      }, []);
+
+      const fetchSemestres = useCallback(async () => {
+        setLoading(true);
+        try {
+          const response = await api.get("/semestres");
+  
+          const semestreList = Array.isArray (response.data) ? response.data : [];
+  
+          setSemestres(semestreList);;
+  
+          // eliminar
+          console.log(semestreList);
+          
+        } catch (error) {
+          setError(error.response.data.message);
+          toast.error("Error fetching categories.");
+          console.log("Error fetching categories", error);
+        } finally {
+          setLoading(false);
+        }
+      }, []);
+
     useEffect(() => {
         if (id) {
             fectchDocumentosDetails();
@@ -81,12 +128,11 @@ const DocumentoDetails = () => {
         formData.append('resumen', documentos.resumen);
         formData.append('fechaPublicacion', documentos.fechaPublicacion);
         formData.append('asesor', documentos.asesor);
-        formData.append('categoria', documentos.categoria?.categoria_id || "");
-        formData.append('tema', documentos.tema)
-        formData.append('carrera', documentos.carrera);
+        formData.append('categoria', documentos.categoriaId);
+        formData.append('carrera', documentos.carreraId);
         formData.append('ciclo', documentos.ciclo);
         formData.append('seccion', documentos.seccion);
-        formData.append('semestre', documentos.semestre);
+        formData.append('semestre', documentos.semestreId);
   
         try {
           setLoading(true)
@@ -96,14 +142,28 @@ const DocumentoDetails = () => {
               'Content-Type': 'multipart/form-data',
             },
           });
-          toast.success("Documento update successsful");
+          Swal.fire({
+            title: "Documento actualizado!",
+            text: "El documento ha sido guardado correctamente.",
+            icon: "success",
+            confirmButtonText: "Aceptar"
+          }).then((result) => {
+            if (result.isConfirmed) {
+              navigate("/documentos");
+            }
+          })
+  
           navigate("/documentos");
   
           console.log('Documento actualizado con éxito:', response.data);
         } catch (error) {
           setError(error.response.data.message);
-          console.error("Error al actualizar el documento:", error);
-          toast.error("Error updating document");
+          Swal.fire({
+            title: "Error",
+            text: "Ocurrió un error al intentar registrar el documento!",
+            icon: "error",
+            confirmButtonText: "Aceptar"
+          });
         } finally {
           setLoading(false);
         } 
@@ -116,7 +176,9 @@ const DocumentoDetails = () => {
 
     useEffect(() => {
         fetchCategoria();
-    }, [fetchCategoria])
+        fetchCarreras();
+        fetchSemestres();
+    }, [fetchCategoria, fetchCarreras, fetchSemestres])
     
 
     // if there is an error
@@ -145,51 +207,51 @@ const DocumentoDetails = () => {
                 </div>
             </div>
             <div className="card card-body bg-light p-4 shadow rounded">
-                <form onSubmit={handleUpdateDocument} encType="multipart/form-data">
+                <form onSubmit={handleUpdateDocument} encType="multipart/form-data" className="formulario">
                 <div className="row g-4">
                     <div className="col-6">
-                        <label>TITULO<span className="text-success">*</span></label>
+                        <label>Título<span className="text-success">*</span></label>
                         <div className="input-group">
                             <div className="input-group-text">
                                 <i className="bi bi-chat-right-dots"></i>
                             </div>
-                            <input
+                            <textarea
                                 type="text"
-                                className="form-control border border-secondary"
+                                className="form-control border border-grey-1"
                                 id="titulo"
                                 name="titulo"
                                 value={documentos.titulo}
                                 onChange={(e) => setDocumentos({ ...documentos, titulo: e.target.value })}
                             >
-                            </input>
+                            </textarea>
                         </div>
                     </div>
                     <div className="col-6">
-                        <label>AUTORES<span className="text-success">*</span></label>
+                        <label>Autores<span className="text-success">*</span></label>
                         <div className="input-group">
                             <div className="input-group-text">
                                 <i className="bi bi-person-lines-fill"></i>
                             </div>
-                            <input
+                            <textarea
                                 type="text"
-                                className="form-control border border-secondary"
+                                className="form-control border border-grey-1"
                                 id="autores"
                                 name="autores"
                                 value={documentos.autores}
                                 onChange={(e) => setDocumentos({ ...documentos, autores: e.target.value })}
                             >
-                            </input>
+                            </textarea>
                         </div>
                     </div>
                     <div className="col-12">
-                        <label>RESUMEN<span className="text-success">*</span></label>
+                        <label>Resumen<span className="text-success">*</span></label>
                         <div className="input-group">
                             <div className="input-group-text">
                                 <i className="bi bi-card-text"></i>
                             </div>
                             <textarea
                                 type="text"
-                                className="form-control border border-secondary"
+                                className="form-control border border-grey-1"
                                 id="resumen"
                                 name="resumen"
                                 value={documentos.resumen}
@@ -199,14 +261,14 @@ const DocumentoDetails = () => {
                         </div>
                     </div>
                     <div className="col-6">
-                        <label>FECHA DE PUBLICACIÓN<span className="text-success">*</span></label>
+                        <label>Fecha de publicación<span className="text-success">*</span></label>
                         <div className="input-group">
                             <div className="input-group-text">
                                 <i className="bi bi-calendar2-day"></i>
                             </div>
                             <input
                                 type="Date"
-                                className="form-control border border-secondary"
+                                className="form-control border border-grey-1"
                                 id="fechaPublicacion"
                                 name="fechaPublicacion"
                                 value={documentos.fechaPublicacion}
@@ -216,14 +278,14 @@ const DocumentoDetails = () => {
                         </div>
                     </div>
                     <div className="col-6">
-                        <label>ASESOR<span className="text-success">*</span></label>
+                        <label>Asesor<span className="text-success">*</span></label>
                         <div className="input-group">
                             <div className="input-group-text">
                                 <i className="bi bi-calendar2-day"></i>
                             </div>
                             <input
                                 type="text"
-                                className="form-control border border-secondary"
+                                className="form-control border border-grey-1"
                                 id="asesor"
                                 name="asesor"
                                 value={documentos.asesor}
@@ -234,75 +296,68 @@ const DocumentoDetails = () => {
                         </div>
                     </div>
                     <div className="col-6">
-                        <label>CATEGORIA<span className="text-success">*</span></label>
+                        <label>Categoria<span className="text-success">*</span></label>
                         <div className="input-group">
                             <div className="input-group-text">
                                 <i className="bi bi-bookmark-star"></i>
                             </div>
                             
                             <select
-                                className="form-control border border-secondary"
+                                className="form-control border border-grey-1"
                                 id="categoria"
                                 name="categoria"
-                                value={documentos.categoria?.categoria_id || ""}
+                                value={documentos.categoriaId || ""}
                                 onChange={(e) => 
                                     setDocumentos({
                                         ...documentos,
-                                        categoria: { ...documentos.categoria, categoria_id: e.target.value },
+                                        categoriaId: e.target.value,
                                     })
                                 }
                             >   
                                 {categories.map((cate) => (
-                                    <option key={cate.categoria_id} value={cate.categoria_id}>
-                                        {cate.nombre_categoria}
+                                    <option key={cate.id} value={cate.id}>
+                                        {cate.nombreCategoria}
                                     </option>
                                 ))}
                             </select>
                         </div>
                     </div>
                     <div className="col-6">
-                        <label>TEMA<span className="text-success">*</span></label>
+                        <label>Carrera<span className="text-success">*</span></label>
                         <div className="input-group">
                             <div className="input-group-text">
                                 <i className="bi bi-chat-square-text-fill"></i>
                             </div>
-                            <input
-                                type="text"
-                                className="form-control border border-secondary"
-                                id="tema"
-                                name="tema"
-                                value={documentos.tema}
-                                onChange={(e) => setDocumentos({ ...documentos, tema: e.target.value })}
-                            >
-                            </input>
+                            <select
+                                className="form-control border border-grey-1"
+                                id="categoria"
+                                name="categoria"
+                                value={documentos.carreraId || ""}
+                                onChange={(e) => 
+                                    setDocumentos({
+                                        ...documentos,
+                                        carreraId: e.target.value,
+                                    })
+                                }
+                            >   
+                                {carreras.map((carre) => (
+                                    <option key={carre.id} value={carre.id}>
+                                        {carre.nombreCarrera}
+                                    </option>
+                                ))}
+                            </select>
+                     
                         </div>
                     </div>
                     <div className="col-6">
-                        <label>CARRERA<span className="text-success">*</span></label>
+                        <label>Ciclo<span className="text-success">*</span></label>
                         <div className="input-group">
                             <div className="input-group-text">
                                 <i className="bi bi-chat-square-text-fill"></i>
                             </div>
                             <input
                                 type="text"
-                                className="form-control border border-secondary"
-                                id="carrera"
-                                name="carrera"
-                                value={documentos.carrera}
-                                onChange={(e) => setDocumentos({ ...documentos, carrera: e.target.value })}
-                            >
-                            </input>
-                        </div>
-                    </div>
-                    <div className="col-6">
-                        <label>CICLO<span className="text-success">*</span></label>
-                        <div className="input-group">
-                            <div className="input-group-text">
-                                <i className="bi bi-chat-square-text-fill"></i>
-                            </div>
-                            <input
-                                type="text"
-                                className="form-control border border-secondary"
+                                className="form-control border border-grey-1"
                                 id="ciclo"
                                 name="ciclo"
                                 value={documentos.ciclo}
@@ -312,14 +367,14 @@ const DocumentoDetails = () => {
                         </div>
                     </div>
                     <div className="col-6">
-                        <label>SECCIÓN<span className="text-success">*</span></label>
+                        <label>Sección<span className="text-success">*</span></label>
                         <div className="input-group">
                             <div className="input-group-text">
                                 <i className="bi bi-chat-square-text-fill"></i>
                             </div>
                             <input
                                 type="text"
-                                className="form-control border border-secondary"
+                                className="form-control border border-grey-1"
                                 id="seccion"
                                 name="seccion"
                                 value={documentos.seccion}
@@ -329,20 +384,29 @@ const DocumentoDetails = () => {
                         </div>
                     </div>
                     <div className="col-6">
-                        <label>SEMESTRE<span className="text-success">*</span></label>
+                        <label>Semestre<span className="text-success">*</span></label>
                         <div className="input-group">
                             <div className="input-group-text">
                                 <i className="bi bi-chat-square-text-fill"></i>
                             </div>
-                            <input
-                                type="text"
-                                className="form-control border border-secondary"
-                                id="semestre"
-                                name="semestre"
-                                value={documentos.semestre}
-                                onChange={(e) => setDocumentos({ ...documentos, semestre: e.target.value })}
-                            >
-                            </input>
+                            <select
+                                className="form-control border border-grey-1"
+                                id="categoria"
+                                name="categoria"
+                                value={documentos.semestreId || ""}
+                                onChange={(e) => 
+                                    setDocumentos({
+                                        ...documentos,
+                                        semestreId: e.target.value,
+                                    })
+                                }
+                            >   
+                                {semestres.map((seme) => (
+                                    <option key={seme.id} value={seme.id}>
+                                        {seme.nombreSemestre}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                     </div>
                     
@@ -351,7 +415,7 @@ const DocumentoDetails = () => {
                             disabled={loading} 
                             className="btn btn-info px-4 float-end mt-4 me-2"
                         >
-                            { loading ? <span>Loading...</span> : " Updating documento" }
+                            { loading ? <span>Loading...</span> : "Guardar documento" }
                         </button>
                         <Link to={'/documentos'} 
                         className="btn btn-success px-4 float-end mt-4 me-2">
@@ -361,6 +425,7 @@ const DocumentoDetails = () => {
                 </div>
                 </form>
             </div>
+            <div className="mt-3"/>
         </div>
     )
 }

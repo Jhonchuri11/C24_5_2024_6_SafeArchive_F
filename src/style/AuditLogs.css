@@ -23,7 +23,7 @@
 }
 
 .logs-select:hover {
-    border-color: #007bff;
+    border-color: #28AECE;
     background-color: #eef3ff;
 }
 
@@ -43,7 +43,7 @@
 
 .page-button.active,
 .page-button:hover {
-    background-color: #007bff;
+    background-color: #28AECE;
     color: white;
 }
 

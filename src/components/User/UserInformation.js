@@ -1,6 +1,7 @@
 import React from "react";
 import { useMyContext } from "../../store/ContextApi";
 import { Link } from "react-router-dom";
+import Skeleton, { SkeletonTheme } from "react-loading-skeleton";
 
 
 const UserInfo = () => {

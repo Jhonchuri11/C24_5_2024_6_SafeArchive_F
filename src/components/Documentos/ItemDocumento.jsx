@@ -156,7 +156,9 @@ const ItemDocumento = () => {
                     </div>
                 </div>
             </div>
+            <div className="mt-3"/>
         </div>
+        
     )
 }
 
