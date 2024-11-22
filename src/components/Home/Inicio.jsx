@@ -24,7 +24,7 @@ export default function Inicio() {
     const [effect, setEffect] = useState("wave");
 
     // filtros avanzados
-    const [filtrosAvanzados, setFiltrosAvanzados] = useState([{ campo: '', condicion: 'contiene', valor: '' }]);
+    const [filtrosAvanzados, setFiltrosAvanzados] = useState([{ campo: '', condicion: 'CONTAINT', valor: '' }]);
 
 
     // Definiendo variables para el funcionamiento de muestra de filtros
@@ -94,19 +94,54 @@ export default function Inicio() {
         fetchCategorias();
     }, [fetchDocumentos, fetchCategorias, currentPage]);
 
+    const construirCriteriosBusqueda = () => {
+
+        const criterios = [];
+
+        if ( categoria || resumen) {
+            criterios.push({
+                categoriaId: categoria,
+                searchKey: "RESUMEN",
+                searchValue: resumen || "",
+                operatorDocument: "CONTAINT"
+            });
+        }
+        
+        
+            filtrosAvanzados.forEach(filtro => {
+                if (filtro.campo && filtro.valor) {
+                    criterios.push({
+                        categoriaId: '',
+                        searchKey: filtro.campo,
+                        searchValue: filtro.valor,
+                        operatorDocument: filtro.condicion
+                    });
+                } 
+            });
+        
+        return criterios;
+    }
      // Manejo de búsqueda básica con retraso de Skeleton
      const handleSearchBasic = async () => {
+
         setLoading(true); // Activar Skeleton al iniciar la búsqueda
+
         setTimeout(async () => {
+
             try {
-                const params = {};
-                if (categoria) params.categoria = categoria;
-                if (resumen) params.resumen = resumen;
                 
-                const response = await api.get(`documentos/search`, { params });
-                setDocumentos(response.data);
-                setTotalDocuments(response.data.length);
-                setLoading(false); // Desactivar Skeleton después de recibir los datos
+                const searchCriteria = construirCriteriosBusqueda(false);
+                
+                const response = await api.post(`documentos/document`, { searchCriteria });
+
+                console.log(response);
+
+                //setDocumentos(response.data);
+
+                //setTotalDocuments(response.data.length);
+
+                //setLoading(false); // Desactivar Skeleton después de recibir los datos
+
             } catch (error) {
                 console.error("Error fetching documents:", error);
                 //setLoading(false);
@@ -122,25 +157,19 @@ export default function Inicio() {
 
     // start andvanc filters
     const aplicarFiltros = async () => {
+
         setLoading(true);
+
         setTimeout( async () => {
+
             try {
-                const params = {
-                };
-    
-                if (categoria) params.categoria = categoria;
-                if (resumen) params.resumen = resumen;
                 
-                filtrosAvanzados.forEach((filtro) => {
-                    params[`campos`] = encodeURIComponent(filtro.campo);
-                    params[`condiciones`] = encodeURIComponent(filtro.condicion);
-                    params[`valores`] = encodeURIComponent(filtro.valor);
-               });
+                const searchCriteria = construirCriteriosBusqueda(true);
+
+                const response = await api.post(`documentos/document`, { searchCriteria });
     
-                const response = await api.get(`documentos/search/advanced`, { params })
-    
-                setDocumentos(response.data);
-                setTotalDocuments(response.data.length);
+                //setDocumentos(response.data);
+                //setTotalDocuments(response.data.length);
                 
                 console.log(response);
     
@@ -153,26 +182,10 @@ export default function Inicio() {
         
     }
 
-
     const handleBusquedaChange = async (e) => {
         setResumen(e.target.value);
-        if (e.target.value.length > 2) {
-            try {
-                const response = await api.get(`/documentos/suggestions`, { params: { resumen: e.target.value } });
-                setSugerencias(response.data);
-                setShowSuggestions(true);
-            } catch (error) {
-                console.log("Error fetching sugerencias:", error);
-            }
-        } else {
-            setShowSuggestions(false);
-        }
     }
 
-    const handleSuggestionClick = (suggestion) => {
-        setResumen(suggestion); // Llena el input con la sugerencia seleccionada
-        setShowSuggestions(false); // Oculta las sugerencias
-    };
 
     const handleCategoriaChange = (e) => {
         setCategoria(e.target.value);
@@ -184,7 +197,7 @@ export default function Inicio() {
     };
 
     const agregarFiltro = () => {
-        setFiltrosAvanzados([...filtrosAvanzados, { campo: '', condicion: 'contiene', valor: '' }]);
+        setFiltrosAvanzados([...filtrosAvanzados, { campo: '', condicion: 'CONTAINT', valor: '' }]);
     };
 
     // Funcionalidad para eliminar elemento
@@ -211,11 +224,8 @@ export default function Inicio() {
                         onChange={handleCategoriaChange}
                         >
                             <option value="">Todo el repositorio</option>
-                            {categorias.map((catego) => (
-                                <option key={catego.id} value={catego.id}>
-                                    {catego.nombreCategoria}
-                                </option>
-                            ))}
+                            <option value="TESIS">Tesis</option>
+                            <option value="PROJECT">Projetos Integradores</option>
                         </select>
                     </div>
                     <div className="col-md-8 primero">
@@ -252,18 +262,17 @@ export default function Inicio() {
                             <select class="form-select border border-grey-1" aria-label="Campo" 
                             value={filtro.campo}
                             onChange={(e) => handleFiltroChange(index, 'campo', e.target.value )} >
-                                <option value="todo">Todos</option>
-                                <option value="autores">Autor</option>
-                                <option value="titulo">Título</option>
-                                <option value="asesor">Asesor</option>
+                                <option value="AUTORES">Autor</option>
+                                <option value="TITULO">Título</option>
+                                <option value="ASESOR">Asesor</option>
                             </select>
                         </div>
                         <div class="col-md-3">
                             <select class="form-select border border-grey-1" aria-label="Condicion"
                             value={filtro.condicion}
                             onChange={(e) => handleFiltroChange(index, 'condicion', e.target.value )}>
-                                <option value="contiene">Contiene</option>
-                                <option value="nocontiene">No contiene</option>
+                                <option value="CONTAINT">Contiene</option>
+                                <option value="NOT_CONTAINT">No contiene</option>
                             </select>
                         </div>
                         <div className="col-md-6">
