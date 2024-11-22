@@ -252,7 +252,6 @@ export default function Inicio() {
                             <select class="form-select border border-grey-1" aria-label="Campo" 
                             value={filtro.campo}
                             onChange={(e) => handleFiltroChange(index, 'campo', e.target.value )} >
-                                <option value="todo">Todos</option>
                                 <option value="autores">Autor</option>
                                 <option value="titulo">Título</option>
                                 <option value="asesor">Asesor</option>
