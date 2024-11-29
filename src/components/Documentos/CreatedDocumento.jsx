@@ -1,13 +1,11 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-//import "../../style/CreatedDocumento.css";
-import "../../style/ContentDocument.css";
-import {toast} from "react-hot-toast";
+import "../../style/CreatedDocumento.css";
 import api from "../../services/api";
-import Errors from "../Errors";
 import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import Swal from "sweetalert2";
+import { FaSave } from "react-icons/fa";
 
 
 
@@ -17,93 +15,36 @@ export default function CreatedDocumento() {
 
     const [loading, setLoading] = useState(false);
 
-    const [error, setError] = useState(false);
+    const [error, setError] = useState(null);
 
-    // Estados para los datos del formulario
-    const [titulo, setTitulo] = useState('');
-    const [autores, setAutores] = useState('');
-    const [resumen, setResumen] = useState('');
-    const [fechaPublicacion, setFechaPublicacion] = useState('');
-    const [asesor, setAsesor] = useState('');
-    const [categoria, setCategoria] = useState('');
-    const [carrera, setCarrera] = useState('');
-    const [ciclo, setCiclo] = useState('');
-    const [seccion, setSeccion] = useState('');
-    const [semestre, setSemestre] = useState('');
-    const [file, setFile] = useState(null);
-
-    // categorias de documentos
     const [categoriasList, setCategoriasList] = useState([]);
 
     const [carrerasList, setCarrerasList] = useState([]);
 
     const [semestressList, setSemestresList] = useState([]);
 
-    const fetchCategoria = useCallback(async () => {
+    const fetchData = useCallback(async (endpoint, setState) => {
+
       setLoading(true);
+      
       try {
-        const response = await api.get("/categorias");
+        const response = await api.get(endpoint);
 
-        const documentList = Array.isArray (response.data) ? response.data : [];
-
-        setCategoriasList(documentList);;
-
-        // eliminar
-        console.log(documentList);
+         setState(Array.isArray (response.data) ? response.data : []);
         
-      } catch (error) {
-        setError(error.response.data.message);
-        console.log("Error fetching categories", error);
+      } catch (err) {
+        setError(err.response?.data?.message || "Error al cargar datos.");
+        console.log(`Error fetching ${endpoint}:`, err);
       } finally {
         setLoading(false);
       }
     }, []);
 
-    const fetchCarrera = useCallback(async () => {
-      setLoading(true);
-      try {
-        const response = await api.get("/carreras");
-
-        const carreraList = Array.isArray (response.data) ? response.data : [];
-
-        setCarrerasList(carreraList);;
-
-        // eliminar
-        console.log(carreraList);
-        
-      } catch (error) {
-        setError(error.response.data.message);
-        console.log("Error fetching categories", error);
-      } finally {
-        setLoading(false);
-      }
-    }, []);
-
-    const fetchSemestre = useCallback(async () => {
-      setLoading(true);
-      try {
-        const response = await api.get("/semestres");
-
-        const semestreList = Array.isArray (response.data) ? response.data : [];
-
-        setSemestresList(semestreList);;
-
-        // eliminar
-        console.log(semestreList);
-        
-      } catch (error) {
-        setError(error.response.data.message);
-        console.log("Error fetching categories", error);
-      } finally {
-        setLoading(false);
-      }
-    }, []);
-
-
-    // Manejar el archivo PDF
-    const handleFileChange = (event) => {
-      setFile(event.target.files[0]);
-    };
+    useEffect(() => {
+      fetchData("/categorias", setCategoriasList);
+      fetchData("/carreras", setCarrerasList);
+      fetchData("/semestres", setSemestresList);
+    }, [fetchData])
 
     const validationSchema = Yup.object({
       titulo: Yup.string().required("El título es obligatorio"),
@@ -115,7 +56,7 @@ export default function CreatedDocumento() {
       carrera: Yup.string().required("La carrera es obligatoria"),
       ciclo: Yup.string().required("El ciclo es obligatorio"),
       semestre: Yup.string().required("El semestre es obligatorio"),
-      seccion: Yup.string(), // opcional
+      seccion: Yup.string(),
       file: Yup.mixed()
         .required("Debes subir un archivo")
         .test("fileSize", "El archivo es muy grande, debe ser menor de 20MB", (value) =>
@@ -128,30 +69,19 @@ export default function CreatedDocumento() {
 
     // Manejar el envío del formulario
     const handleSubmit = async (values) => {
+      const cleanedValues = {
+        ...values,
+        titulo: values.titulo.trim(),
+        autores: values.autores.trim(),
+        resumen: values.resumen.trim(),
+        asesor: values.asesor.trim(),
+      };
+
       const formData = new FormData();
-      Object.keys(values).forEach((key) => {
-        formData.append(key, values[key]);
+      Object.keys(cleanedValues).forEach((key) => {
+        formData.append(key, cleanedValues[key]);
       });
       
-
-      
-
-      // Crear un objeto FormData para enviar los datos
-      /*
-      const formData = new FormData();
-      formData.append('file', file); 
-      formData.append('titulo', titulo);
-      formData.append('autores', autores);
-      formData.append('resumen', resumen);
-      formData.append('fechaPublicacion', fechaPublicacion);
-      formData.append('asesor', asesor);
-      formData.append('categoria', categoria);
-      formData.append('carrera', carrera);
-      formData.append('ciclo', ciclo);
-      formData.append('seccion', seccion);
-      formData.append('semestre', semestre);
-      */
-
       try {
         setLoading(true)
         const response = await api.post('/documentos/uploaddrive', formData, {
@@ -159,31 +89,15 @@ export default function CreatedDocumento() {
             'Content-Type': 'multipart/form-data',
           },
         });
-
-        Swal.fire({
-          title: "Registro de documento exitoso",
-          text: "El documento ha sido registrado correctamente.",
-          icon: "success",
-          confirmButtonText: "Aceptar"
-        }).then((result) => {
-          if (result.isConfirmed) {
-            navigate("/documentos");
-          }
-        })
-
-        navigate("/documentos");
+        Swal.fire("Éxito","El documento ha sido registrado correctamente.", "success").then(() => {
+            navigate("/documentos"); 
+        });
 
         console.log('Documento subido con éxito:', response);
 
-      } catch (error) {
-        setError(error.response.data.message);
-        console.error("Error al subir el documento:", error);
-        Swal.fire({
-          title: "Error",
-          text: "Ocurrió un error al intentar registrar el documento!",
-          icon: "error",
-          confirmButtonText: "Aceptar"
-        });
+      } catch (err) {
+        setError(err.response?.data?.message || "Falló al registrar el documento.");
+        Swal.fire("Error","Ocurrió un error al intentar registrar el documento!", "error");
       } finally {
         setLoading(false);
       }
@@ -193,19 +107,6 @@ export default function CreatedDocumento() {
       });
       
     };
-    
-    useEffect(() => {
-      fetchCategoria();
-      fetchCarrera();
-      fetchSemestre();
-    }, [fetchCategoria, fetchCarrera, fetchSemestre])
-
-    // to show and erros
-    if (error) {
-      return <Errors message={error} />;
-
-    
-  }
 
     return (
         <section className="container mt-4">
@@ -253,7 +154,7 @@ export default function CreatedDocumento() {
             <Field
             as="textarea"
              name="titulo"
-            className="form-control border border-grey-1"
+            className="form-control input_btn border border-grey-1"
             placeholder="Título"
             />
           </div>
@@ -268,7 +169,7 @@ export default function CreatedDocumento() {
             </div>
             <Field
             as="textarea" 
-              className="form-control border border-grey-1"
+              className="form-control input_btn  border border-grey-1"
               placeholder="Nombres y apellidos"
               id="autores"
               name="autores"
@@ -283,9 +184,10 @@ export default function CreatedDocumento() {
             <div className="input-group-text">
               <i className="bi bi-card-text"></i>
             </div>
+            
             <Field
             as="textarea" 
-              className="form-control border border-grey-1"
+              className="form-control input_btn  border border-grey-1"
               placeholder="Resumen"
               id="resumen"
               name="resumen"
@@ -302,7 +204,7 @@ export default function CreatedDocumento() {
             </div>
             <Field
               type="date"
-              className="form-control border border-grey-1"
+              className="form-control input_btn  border border-grey-1"
               id="fechaPublicacion"
               name="fechaPublicacion"
             />
@@ -318,7 +220,7 @@ export default function CreatedDocumento() {
             </div>
             <Field
               type="text"
-              className="form-control border border-grey-1"
+              className="form-control input_btn  border border-grey-1"
               placeholder="Nombres y apellidos"
               id="asesor"
               name="asesor"
@@ -335,7 +237,7 @@ export default function CreatedDocumento() {
             </div>
             <Field
             as="select"
-              className="form-select border border-grey-1 border border-grey-1" aria-label="Default select example"
+              className="form-select input_btn  border border-grey-1 border border-grey-1" aria-label="Default select example"
               id="categoria"
               name="categoria"
             >
@@ -359,7 +261,7 @@ export default function CreatedDocumento() {
             </div>
             <Field
             as="select"
-              className="form-select border border-grey-1"
+              className="form-select input_btn  border border-grey-1"
               id="carrera"
               name="carrera"
             >
@@ -381,7 +283,7 @@ export default function CreatedDocumento() {
             </div>
             <Field
             as="select"
-              className="form-select border border-grey-1"
+              className="form-select  input_btn border border-grey-1"
               id="ciclo"
               name="ciclo"
             >
@@ -404,7 +306,7 @@ export default function CreatedDocumento() {
             </div>
             <Field
             as="select"
-              className="form-select border border-grey-1"
+              className="form-select input_btn  border border-grey-1"
               id="seccion"
               name="seccion"
             >
@@ -414,7 +316,8 @@ export default function CreatedDocumento() {
               <option value="C">C</option>
               <option value="D">D</option>
               <option value="E">E</option>
-              <option value="E">F</option>
+              <option value="F">F</option>
+              <option value="G">G</option>
             </Field>
           </div>
           <ErrorMessage name="seccion" component="div" className="text-danger" />
@@ -427,7 +330,7 @@ export default function CreatedDocumento() {
             </div>
             <Field
             as="select"
-              className="form-select border border-grey-1"
+              className="form-select input_btn  border border-grey-1"
               id="semestre"
               name="semestre"
             >
@@ -444,7 +347,7 @@ export default function CreatedDocumento() {
         <div className="col-sm-6 mb-3">
           <label htmlFor="formFile" className="form-label">Archivo<span className="text-danger">*</span> </label>
           <input
-           className="form-control border border-grey-1" 
+           className="form-control input_btn border border-grey-1" 
            type="file" 
            id="file" 
            accept="application/pdf"
@@ -456,17 +359,26 @@ export default function CreatedDocumento() {
 
         <div className="col-12">
           <button
-          disabled={loading} className="btn btn-info px-4 float-end mt-4 me-2">
-            { loading ? <span>Loading...</span> : " Registrar documento" }
+          
+          disabled={loading} type="submit" className="btn btn-info button_page_filter_register px-4 float-end mt-4 me-2">
+            <FaSave/>
+            { loading ? <span>Registrando...</span> : " Registrar" }
           </button>
       
-          <Link to={'/documentos'} className="btn btn-success px-4 float-end mt-4 me-2">Cancelar</Link>
+          <Link to={'/documentos'} className="btn btn-success button_page_filter_register px-4 float-end mt-4 me-2">Cancelar</Link>
           
+
         </div>
       </div>
     </Form>
     )}
     </Formik>
+
+    {loading && (
+      <div className="loading-overlay">
+         <div className="spinner"></div>
+      </div>
+    )}
   </div>
   <div className="mt-3"/>
 </section>

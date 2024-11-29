@@ -3,11 +3,11 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import toast from 'react-hot-toast';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
 import DocumentSkeleton from '../Skeleton/DocumentSkeleton';
-//import 'react-loading-skeleton/dist/Skeleton';
+import Errors from '../Errors';
+import { FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa';
 
 
 export default function Inicio() {
@@ -17,14 +17,8 @@ export default function Inicio() {
 
     const [resumen, setResumen] = useState('');
 
-    const [sugerencias, setSugerencias] = useState([]);
-
-    const [showSuggestions, setShowSuggestions] = useState(false);
-
-    const [effect, setEffect] = useState("wave");
-
     // filtros avanzados
-    const [filtrosAvanzados, setFiltrosAvanzados] = useState([{ campo: '', condicion: 'CONTAINT', valor: '' }]);
+    const [filtrosAvanzados, setFiltrosAvanzados] = useState([{ campo: 'TITULO', condicion: 'CONTAINT', valor: '' }]);
 
 
     // Definiendo variables para el funcionamiento de muestra de filtros
@@ -36,7 +30,7 @@ export default function Inicio() {
 
     const [loading, setLoading] = useState(true);
 
-    const [errorr, setError] = useState(false);
+    const [error, setError] = useState(false);
 
     // tipo de documento categorias
     const [categorias, setCategorias] = useState([]);
@@ -60,15 +54,15 @@ export default function Inicio() {
           const documentList = Array.isArray(response.data) ? response.data : [];
   
           setCategorias(documentList);;
-  
-          console.log(documentList);
           
-        } catch (err) {
-          setError(err?.response?.data?.message);
+        } catch (error) {
+          setError(error?.response?.data?.message);
+        } finally {
+            setLoading(false);
         }
     }, []);
 
-    const fetchDocumentos = useCallback(async (page = 0, limit = 5 ) => {
+    const fetchDocumentos = useCallback(async (page = 0, limit = 10 ) => {
       
         try {
             setLoading(true);
@@ -77,15 +71,18 @@ export default function Inicio() {
 
             setDocumentos(documentsData);
 
+            console.log(documentsData);
+
             setLoading(false);
 
             // total documentos
             setTotalDocuments(parseInt(response.headers['x-total-count'], 10));
 
-        } catch (err) {
-            setError(err?.response?.data?.message);
-            toast.error("Error fetching documentos", err);
-        } 
+        } catch (error) {
+            setError(error?.response?.data?.message);
+        } finally {
+            setLoading(false);
+        }
 
     }, []);
 
@@ -94,32 +91,30 @@ export default function Inicio() {
         fetchCategorias();
     }, [fetchDocumentos, fetchCategorias, currentPage]);
 
-    const construirCriteriosBusqueda = () => {
-
+    const construirCriteriosBusqueda = (esAvanzado) => {
         const criterios = [];
 
-        if ( categoria || resumen) {
-            criterios.push({
-                categoriaId: categoria,
-                searchKey: "RESUMEN",
-                searchValue: resumen || "",
-                operatorDocument: "CONTAINT"
-            });
+        if (categoria) {
+            criterios.push({ searchKey: "CATEGORIAID", searchValue: categoria || '', operator: "EQUALS" });
         }
-        
-        
+
+        if (resumen) {
+            criterios.push({ searchKey: "RESUMEN", searchValue: resumen || '', operator: "CONTAINT" });
+        }
+
+        if (esAvanzado) {
             filtrosAvanzados.forEach(filtro => {
                 if (filtro.campo && filtro.valor) {
                     criterios.push({
-                        categoriaId: '',
                         searchKey: filtro.campo,
-                        searchValue: filtro.valor,
-                        operatorDocument: filtro.condicion
+                        searchValue: filtro.valor || '',
+                        operator: filtro.condicion
                     });
-                } 
+                }
             });
-        
-        return criterios;
+        }
+
+        return { searchCriteria: criterios };
     }
      // Manejo de búsqueda básica con retraso de Skeleton
      const handleSearchBasic = async () => {
@@ -132,21 +127,22 @@ export default function Inicio() {
                 
                 const searchCriteria = construirCriteriosBusqueda(false);
                 
-                const response = await api.post(`documentos/document`, { searchCriteria });
+                const response = await api.post(`/documentos/document`, searchCriteria );
 
                 console.log(response);
 
-                //setDocumentos(response.data);
+                setDocumentos(response.data);
 
-                //setTotalDocuments(response.data.length);
+                setTotalDocuments(response.data.length);
 
-                //setLoading(false); // Desactivar Skeleton después de recibir los datos
+                //setLoading(false);
 
             } catch (error) {
-                console.error("Error fetching documents:", error);
-                //setLoading(false);
+                setError(error?.response?.data?.message);
+            } finally {
+                setLoading(false);
             }
-        }, 5000); // 5 segundos de retraso para mostrar el Skeleton
+        }, 2000); // 5 segundos de retraso para mostrar el Skeleton
     };
 
     // funcion paginacion
@@ -166,19 +162,17 @@ export default function Inicio() {
                 
                 const searchCriteria = construirCriteriosBusqueda(true);
 
-                const response = await api.post(`documentos/document`, { searchCriteria });
+                const response = await api.post(`/documentos/document`, searchCriteria  );
     
-                //setDocumentos(response.data);
-                //setTotalDocuments(response.data.length);
-                
-                console.log(response);
+                setDocumentos(response.data);
+                setTotalDocuments(response.data.length);
     
             } catch (error) {
-                console.log("Error en obtener documentos por filtes", error);
+                setError(error?.response?.data?.message);
             } finally {
                 setLoading(false);
             }    
-        }, 5000);
+        }, 2000);
         
     }
 
@@ -197,51 +191,62 @@ export default function Inicio() {
     };
 
     const agregarFiltro = () => {
-        setFiltrosAvanzados([...filtrosAvanzados, { campo: '', condicion: 'CONTAINT', valor: '' }]);
+        setFiltrosAvanzados([...filtrosAvanzados, { campo: 'TITULO', condicion: 'CONTAINT', valor: '' }]);
     };
 
-    // Funcionalidad para eliminar elemento
+  
     const eliminarFiltro = (index) => {
         const nuevoFiltros = filtrosAvanzados.filter((_, i) => i !== index);
         setFiltrosAvanzados(nuevoFiltros);
     } 
 
     const restaurarElementos = () => {
-        setFiltrosAvanzados([{}]);
+        setFiltrosAvanzados([{ campo: 'TITULO', condicion: 'CONTAINT', valor: '' }]);
+        setCategoria('');
+        setResumen('');
     };
+
+     // to show and erros
+     if (error) {
+        return <Errors message={error} />
+    }
 
     return (
         <section>
             <div className="container p-2">
-                <h2 className='text-start'>Buscar</h2>
+                <h3 className='text-start'>Buscar</h3>
                 <hr/>
             </div>
             <div className="container">
                 <div className="row">
                     <div className="col-md-4">
-                        <select className="form-select border border-grey-1" aria-label="Default select example"
+                        <select className="form-select input_btn border border-grey-1" aria-label="Default select example"
                         value={categoria}
                         onChange={handleCategoriaChange}
                         >
                             <option value="">Todo el repositorio</option>
-                            <option value="TESIS">Tesis</option>
-                            <option value="PROJECT">Projetos Integradores</option>
+                            {categorias.map((catego) => (
+                                <option key={catego.id} value={catego.id}>
+                                    {catego.nombreCategoria}
+                                </option>
+                            ))}
                         </select>
                     </div>
                     <div className="col-md-8 primero">
                         <div className="input-group mb-3">
-                            <input type="text" class="form-control controlador border border-grey-1" placeholder="Ingresar su búsqueda"
+                            <input type="text" 
+                            className="form-control controlador input_btn border border-grey-1" placeholder="Ingresar su búsqueda"
                             value={resumen}
                             onChange={handleBusquedaChange}/>
 
-                            <button class="btn btn-outline-secondary" onClick={(e)=> handleSearchBasic(e)} type="button" >
+                            <button className="btn button_page_filters btn-outline-secondary" onClick={(e)=> handleSearchBasic(e)} type="button" >
                                 <i className="bi bi-search"></i>
                             </button>
                         </div>
 
                     </div>
                     <div className="col-md-2">
-                        <button class="btn btn-link"  onClick={cambioEstado}>
+                        <button className="btn btn-link"  onClick={cambioEstado}>
                             {mostrarFiltros ? 'Ocultar filtros' : 'Mostrar filtros'}  
                         </button>
                     </div>
@@ -250,7 +255,7 @@ export default function Inicio() {
             {mostrarFiltros && (
             <div className="container mt-3" >
                 <div className="row">
-                    <h2 className='text-start'>Filtros</h2>
+                    <h4 className='text-start'>Filtros</h4>
                     <p>Use los siguientes criterios para mejorar sus resultados</p>
                 </div>
                 <div id="contenedor">
@@ -259,16 +264,16 @@ export default function Inicio() {
 
                     <div className="row elemento" key={index}>
                         <div className="col-md-3">
-                            <select class="form-select border border-grey-1" aria-label="Campo" 
+                            <select className="form-select input_btn border border-grey-1" aria-label="Campo" 
                             value={filtro.campo}
                             onChange={(e) => handleFiltroChange(index, 'campo', e.target.value )} >
-                                <option value="AUTORES">Autor</option>
                                 <option value="TITULO">Título</option>
+                                <option value="AUTORES">Autor</option>
                                 <option value="ASESOR">Asesor</option>
                             </select>
                         </div>
-                        <div class="col-md-3">
-                            <select class="form-select border border-grey-1" aria-label="Condicion"
+                        <div className="col-md-3">
+                            <select className="form-select input_btn border border-grey-1" aria-label="Condicion"
                             value={filtro.condicion}
                             onChange={(e) => handleFiltroChange(index, 'condicion', e.target.value )}>
                                 <option value="CONTAINT">Contiene</option>
@@ -277,19 +282,20 @@ export default function Inicio() {
                         </div>
                         <div className="col-md-6">
                             <div className="input-group mb-3">
-                                <input type="text" class="form-control border border-grey-1" 
+                                <input type="text" className="form-control input_btn border border-grey-1" 
                                 placeholder="Ingresar su búsqueda" 
                                 value={filtro.valor}
                                 onChange={(e) => handleFiltroChange(index, 'valor', e.target.value )}
                                />
 
-                                <button class="btn btn-outline-secondary" 
+                                <button className="btn button_page_filters btn-outline-secondary" 
                                 onClick={agregarFiltro}   type="button">
                                     <i class="bi bi-plus-circle"></i>
                                 </button>
-                                <button class="btn btn-outline-secondary" 
-                                onClick={() => eliminarFiltro(index)} disabled={filtrosAvanzados.length === 1}  type="button">
-                                    <i class="bi bi-dash-circle"></i>
+                                <button className="btn button_page_filters btn-outline-secondary" 
+                                onClick={() => eliminarFiltro(index)} disabled={filtrosAvanzados.length === 1} 
+                                 type="button">
+                                    <i className="bi bi-dash-circle"></i>
                                 </button>
                             </div>
                         </div>
@@ -297,9 +303,9 @@ export default function Inicio() {
                 )}
 
                 </div>
-                <div class="col-md-3">
-                    <button className='btn btn-grey border' onClick={restaurarElementos}>Restaurar</button>
-                    <button class="btn btn-grey border" onClick={(e)=> aplicarFiltros(e)}>Aplicar</button>
+                <div className="col-md-3">
+                    <button className="btn button_page_filter btn-grey border" onClick={restaurarElementos}>Restaurar</button>
+                    <button className="btn button_page_filter btn-grey border" onClick={(e)=> aplicarFiltros(e)}>Aplicar</button>
                 </div>
             </div>
             )}
@@ -322,10 +328,10 @@ export default function Inicio() {
                             <div className="row" key={index}>
                                 <div className="col-md-3 mt-4">
                                     <Link to={`/detalle/${documento.id}`}>
-                                        {documento.thumbnailUrl ? (
+                                        {documento.thumbnail_link ? (
                                             <img
                                                 className="imgdocumento"
-                                                src={documento.thumbnailUrl}
+                                                src={documento.thumbnail_link}
                                                 alt={`${documento.titulo}`}
                                                 width={"240px"}
                                                 height={"240px"}
@@ -348,20 +354,20 @@ export default function Inicio() {
                 </div>
 
                 <nav aria-label="Page navigation">
-                    <ul class="pagination">
-                        <li class="page-item">
+                    <ul className="pagination">
+                        <li className="page-item">
                             <button 
-                                class="page-link" 
+                                className="page-link " 
                                 onClick={() => handlePageChange(currentPage - 1)}
                                 disabled={currentPage === 0}>
-                                Anterior
+                                 <FaChevronCircleLeft/>
                             </button>
                         </li>
 
                         {Array.from({ length: Math.ceil(totalDocuments / 10 ) }, (_, index ) => (
-                            <li class="page-item" key={index}>
+                            <li className="page-item" key={index}>
                                 <button 
-                                    class="page-link"
+                                    class="page-link "
                                     onClick={() => handlePageChange(index)}
                                     disabled={index === currentPage}>
                                         { index + 1 }
@@ -369,12 +375,12 @@ export default function Inicio() {
                             </li>
                         ))}
                         
-                        <li class="page-item">
+                        <li className="page-item">
                             <button 
-                                class="page-link" 
+                                className="page-link" 
                                 onClick={() => handlePageChange(currentPage + 1)}
                                 disabled={(currentPage + 1 ) * 10 >= totalDocuments}>
-                                    Siguiente
+                                    <FaChevronCircleRight/>
                             </button>
                         </li>
                     </ul>

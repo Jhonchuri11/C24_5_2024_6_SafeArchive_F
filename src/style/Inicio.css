@@ -1,6 +1,10 @@
 .letter-link {
     margin-right: 10px;
 }
+.page-link {
+    box-shadow: 1px 1px  #ccc;
+   
+}
 .pagination {
     justify-content: center;
     margin-top: 20px;
@@ -54,4 +58,5 @@
     line-clamp: 3;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: justify;
 }

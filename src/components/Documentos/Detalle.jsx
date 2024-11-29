@@ -1,10 +1,13 @@
 import React, { useCallback, useEffect, useState } from "react";
 import doctesis from '../../assets/images/doc_tesis.png';
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import api from "../../services/api";
 import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
+import Errors from "../Errors";
 export default function Detalle() {
+
+    const navigate = useNavigate();
 
     const [ loading, setLoading] = useState(false);
 
@@ -34,6 +37,10 @@ export default function Detalle() {
     }, [documentoId]);
 
     // funcion para descargar documentor
+    const handleDownloadViewDocument = async (docId) => {
+        navigate(`/download-view-document/${docId}`);
+    }
+
     const handleDowload = async () => {
         try 
         {
@@ -54,9 +61,9 @@ export default function Detalle() {
             link.click();
             
             document.body.removeChild(link);
-        } catch (err) {
-            console.log(err?.response?.data?.message);
-            toast.error("Error downloading document");
+        } catch (error) {
+            console.log(error?.response?.data?.message);
+            //toast.error("Error downloading document");
         }
     }
 
@@ -73,6 +80,9 @@ export default function Detalle() {
 
     if (loading) return <p>Cargando los resultados</p>;
     if (error) return <p>Error: {error}</p>
+     if (error) {
+        return <Errors message={error} />
+    }
     if (!documento) return null;
 
     return (
@@ -98,7 +108,8 @@ export default function Detalle() {
 
                         <p class="mt-4">Ver y descargar documento</p>
 
-                        <button onClick={handleDowload}  className="btn btn-info documento">Descargar documento</button>
+                        <button onClick={() => handleDownloadViewDocument(documento.id)}  className="btn btn-info documento">
+                            Click aquí!</button>
 
                         <p class="mt-2">Autores</p>
 
@@ -108,7 +119,7 @@ export default function Detalle() {
                         <h4>RESUMEN</h4>
                     <p class="resumen">{documento.resumen}</p>
                     <div className="mt-2">
-                        <h4>Carrera</h4>
+                        <h4>CARRERA</h4>
                         <p>
                             {documento.nombreCarrera}
                             <br/>

@@ -1,31 +1,27 @@
 import React, { useCallback, useEffect, useState } from "react";
 import '../../style/ContentDocument.css';
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import api from "../../services/api";
 import { format } from 'date-fns';
 import toast from "react-hot-toast";
 import Errors from "../Errors";
-import { IconButton, Tooltip } from "@mui/material";
+import { IconButton, Select, Tooltip } from "@mui/material";
 import { MdRemoveRedEye } from "react-icons/md";
 import { FaBan, FaCheck, FaChevronCircleLeft, FaChevronCircleRight,FaEdit, FaFileAlt, FaFileArchive, FaFileUpload, FaSearch, FaTrash } from "react-icons/fa";
+import DocumentPreviewModal from "../Asesor/DocumentPreviewModal;";
 import Swal from "sweetalert2";
 
 const ContentDocument = () => {
-
-    const navigate = useNavigate();
-
     const [documentos, setDocumentos] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
 
-    const [busqueda, setBusqueda] = useState('');
-    const [resultados, setResultados] = useState([]);
+    const [previewUrl, setPreviewUrl] = useState(null);
+    const [openModal, setOpenModal] = useState(false);
 
     // filter frontend
     const [filteredDocs, setFilteredDocs] = useState([]);  
-    const [titulo, setTitulo] = useState('');  
-    const [autores, setAutores] = useState('');    
-
+    const [titulo, setTitulo] = useState('');               
     const [carrera, setCarrera] = useState('');             
     const [carrerasUnicas, setCarrerasUnicas] = useState([]); 
 
@@ -58,12 +54,10 @@ const ContentDocument = () => {
     useEffect(() => {
         let filtered = documentos;
 
-        if (busqueda.trim()) {
+        if (titulo.trim()) {
             filtered = filtered.filter(doc =>
-                doc.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
-                doc.autores.toLowerCase().includes(busqueda.toLocaleLowerCase()) ||
-                doc.nombreCategoria.toLocaleLowerCase().includes(busqueda.toLocaleLowerCase())
-            );
+                doc.titulo.toLowerCase().includes(titulo.toLowerCase())
+            )
         }
 
         if (carrera) {
@@ -73,10 +67,28 @@ const ContentDocument = () => {
         }
 
         setFilteredDocs(filtered);
-    }, [busqueda , carrera, documentos]);
+    }, [titulo, carrera, documentos]);
 
     const handleViewDocument = async (docId) => {
-        navigate(`/view-document/${docId}`);
+        setLoading(true);
+
+        try {
+            const response = await api.get(`/documentos/download/pdf?id=${docId}`, {
+                responseType: 'blob',
+            });
+            
+            const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+
+            setPreviewUrl(url);
+            setOpenModal(true);
+            
+            console.log(response.data);
+
+        } catch (error) {
+            console.error("Error al obtener la URL de previsualización", error);
+        } finally {
+            setLoading(false);
+        }
     }
 
     const handleDisableDocumento = async (docId, currentStatus) => {
@@ -132,6 +144,13 @@ const ContentDocument = () => {
         }
     };
 
+    // funcion para el modal
+    const handleCloseModal = () => {
+        setOpenModal(false);
+        setPreviewUrl(null);
+    }
+
+
     // to show and erros
     if (error) {
         return <Errors message={error} />
@@ -182,33 +201,22 @@ const ContentDocument = () => {
                                 <span>LISTADO DE DOCUMENTO</span>
                             </div>
                             
-                            <div className="card card-body rounded-0 border-0">
+                            <div className="card card-body rounded-0 border-0 ">
                                 
-                            <div className="row d-flex align-items-center">
-                                {/* Buscador */}
-                                <div className="col-md-4 d-flex  align-items-center">
-                                    <div className="input-group">
-                                        <input
-                                        type="text"
-                                        placeholder="Buscar..."
-                                        className="form-control input_btn border border-grey-1" 
-                                        value={busqueda}
-                                        onChange={(e) => setBusqueda(e.target.value)}
-                                        />
-                                        <span className="input-group-text button_page_filters bg-white">
-                                            <FaSearch />
-                                        </span>
-                                    </div>
+                            <div className="row">
+                                <div className="col-md-6">
+                                    <FaSearch/>
+                                    <input
+                                type="text"
+                                placeholder="Buscar por titulo ..."
+                                value={titulo}
+                                onChange={(e) => setTitulo(e.target.value)}/>
                                 </div>
-                                 {/* Filtro */}
-                                <div className="col-md-4 text-center">
-                                    <label className="me-2 fw-bold">Filtrar:</label>
-                                    <select
-                                    className="form-select input_btn d-inline-block w-75"
-                                    value={carrera}
-                                    onChange={(e) => setCarrera(e.target.value)}
-                                    >
-                                    <option value="">Todas las carreras</option>
+                                <div className="col-md-6">
+                                <select
+                                value={carrera}
+                                onChange={(e) => setCarrera(e.target.value)}>
+                                    <option value="">Toda carrera</option>
                                     {carrerasUnicas.map((uniqueCar, i) => (
                                         <option key={i} value={uniqueCar}>
                                             {uniqueCar}
@@ -216,27 +224,7 @@ const ContentDocument = () => {
                                     ))}
                                 </select>
                                 </div>
-
-                                {/* Paginación */}
-                                <div className="col-md-4 d-flex justify-content-end align-items-center">
-                                    <span className="me-3">Página {currentPage} de {totalPages}</span>
-                                    <button 
-                                    className="rounded button_page_list_doc" 
-                                    onClick={handlePrevPage} 
-                                    disabled={currentPage === 1}
-                                    >
-                                        <FaChevronCircleLeft/>
-                                    </button>
-                                    <button 
-                                    className="rounded button_page_list_doc" 
-                                    onClick={handleNextPage} 
-                                    disabled={currentPage === totalPages}
-                                    >
-                                        <FaChevronCircleRight/>
-                                    </button>
-                                </div>
                             </div>
-                            
                                 <div className="table-responsive d-flex flex-column align-items-center mt-4">
                                 
                                     
@@ -255,20 +243,7 @@ const ContentDocument = () => {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {documentos.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan="8" className="text-center">
-                                                        No cuentas con ningún registro actualmente.
-                                                    </td>
-                                                </tr>
-                                            ) : currentDocuments.length === 0 ? (
-                                                <tr>
-                                                    <td colSpan="8" className="text-center">
-                                                        No se encontró ningún resultado.
-                                                    </td>
-                                                </tr>
-                                            ) : (
-                                             currentDocuments.map((doc) => (
+                                            {currentDocuments.map((doc) => (
                                                 <tr 
                                                 key={doc.id}
                                                 className={doc.status ? 'row-enabled' : 'row-disabled' }>
@@ -281,7 +256,7 @@ const ContentDocument = () => {
                                                         <Tooltip title="Ver documento">
                                                         
                                                             <IconButton onClick={() => handleViewDocument(doc.id)}>
-                                                                <FaFileAlt color="#28AECE" style={{ fontSize: "24px" }}/>
+                                                                <FaFileAlt style={{ fontSize: "24px" }}/>
                                                             </IconButton>
                                                      
                                                         </Tooltip>
@@ -299,7 +274,7 @@ const ContentDocument = () => {
                                                             </Link>
                                                         </Tooltip>
                                                         <Tooltip title="Editar documento">
-                                                            <Link  to={`/documentos/editar-documento/${doc.id}`}>
+                                                            <Link to={`/documentos/editar-documento/${doc.id}`}>
                                                                 <IconButton>
                                                                     <FaEdit color="black" />
                                                                 </IconButton>
@@ -312,19 +287,34 @@ const ContentDocument = () => {
                                                         </Tooltip>
                                                     </td>
                                                 </tr>
-                                            ))
-                                        )}
+                                            ))}
                                         </tbody>
                                     </table>
                                 </div>
                                 
-                                {/* AQUI LA PAGINACION */}
+                                <div aria-label="Page navigation">
+                                    
+                                    <span className="mt-2">Página {currentPage} de {totalPages}</span>
+                                    
+                                    <button className="rounded" onClick={handlePrevPage} disabled={currentPage === 1}>
+                                        <FaChevronCircleLeft/>
+                                    </button>
+                                    <button className="rounded" onClick={handleNextPage} disabled={currentPage === totalPages}>
+                                        <FaChevronCircleRight/>
+                                     </button>
+                                </div>
                             </div>
                         </div>
 
                     </div>
                 </div>
             </div>
+
+            {/* Modal para mostrar la previsualización del PDF */}
+            <DocumentPreviewModal
+            open={openModal}
+            onclose={handleCloseModal}
+            previewUrl={previewUrl}/>
 
         </div>
     );

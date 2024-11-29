@@ -2,22 +2,24 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../../services/api";
 import toast from "react-hot-toast";
+import Errors from "../Errors";
+import { format, formatDate } from "date-fns";
+import { es } from "date-fns/locale";
 
 const ItemDocumento = () => {
 
     // obtaing id for params
     const { id } = useParams();
 
+    const formatDate = (date) => {
+        return format(new Date(date), 'dd MMMM yyyy', { locale: es });
+    };
+
     const [documentos, setDocumentos] = useState({});
 
     // Estados para los datos del formulario
-
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
-
-    // categorias de documentos
-    const [categories, setCategories] = useState([]);
-
 
     const fectchDocumentosDetails = useCallback(async () => {
         setLoading(true);
@@ -39,33 +41,16 @@ const ItemDocumento = () => {
         }
     }, [id]);
 
-    const fetchCategoria = useCallback(async () => {
-        setLoading(true);
-        try {
-          const response = await api.get("/categorias");
-  
-          const categoriaList = Array.isArray (response.data) ? response.data : [];
-  
-          setCategories(categoriaList);;
-  
-          // eliminar
-          console.log(categoriaList);
-          
-        } catch (error) {
-          setError(error.response.data.message);
-          toast.error("Error fetching categories.");
-          console.log("Error fetching categories", error);
-        } finally {
-          setLoading(false);
-        }
-      }, []);
-
     useEffect(() => {
         if (id) {
             fectchDocumentosDetails();
         }
     }, [id, fectchDocumentosDetails]);
 
+     // to show and erros
+     if (error) {
+        return <Errors message={error} />
+    }
 
     return (
         <div className="container mt-4">
@@ -88,64 +73,65 @@ const ItemDocumento = () => {
                 </div>
             </div>
             <div className="card">
-                <div className="card-header bg-info text-white">
-                    <h5 className="mb-0">Detalle de registro documento</h5>
+                <div className="card-header box_header_1 py-2">
+                    <span className="mb-0">DETALLE DE REGISTRO DE DOCUMENTO</span>
                 </div>
-                <div className="card-body">
-
-                    <h6 className="mb-3 text-info">Detalle del asesor</h6>
-                    <hr/>
+                <div className="card-body ">
+                    <strong className="mb-0 text-item-title">Detalle del asesor</strong>
+                    <hr className="line_item"/>
                     <div className="row mb-4">
                         <div className="col-md-6">
-                            <strong>CORREO</strong>
-                            <p>{documentos.nombreUsuario}</p>
+                            <p>Correo electrónico</p>
+                            <strong>{documentos.nombreUsuario}</strong>
                         </div>
                         <div className="col-md-6">
-                            <strong>NOMBRES Y APELLIDOS</strong>
-                            <p>{documentos.asesor}</p>
+                            <p>Nombres y Apellidos</p>
+                            <strong>{documentos.asesor}</strong>
+                         
                         </div>
                     </div>
 
-                    <hr/>
-                    <h6 className="mb-3 text-info">Detalle del documento</h6>
+                    <strong className="mb-3 text-item-title">Detalle del documento</strong>
+                    <hr className="line_item"/>
                     <div className="row mb-4">
                          <div className="col-md-6">
-                            <strong>CATEGORIA</strong>
-                            <p>{documentos.nombreCategoria}</p>
+                            <p>Categoria</p>
+                            <strong>{documentos.nombreCategoria}</strong>
                         </div>
                         <div className="col-md-6">
-                            <strong>TITULO</strong>
-                            <p>{documentos.titulo}</p>
+                            <p>Título</p>
+                            <strong>{documentos.titulo}</strong>
+                            
                         </div>
                         <div className="col-md-6">
-                            <strong>AUTORES</strong>
-                            <p>{documentos.autores}</p>
+                            <p className="mt-2">Autores</p>
+                            <strong>{documentos.autores}</strong>
                         </div>
                         <div className="col-md-6">
-                            <strong>FECHA DE PUBLICACIÓN</strong>
-                            <p>{documentos.fechaPublicacion}</p>
+                            <p className="mt-2">Fecha de publicación</p>
+                            <strong>{documentos.fechaPublicacion ? formatDate(documentos.fechaPublicacion) : ""}</strong>
                         </div>
 
                     </div>
 
-                    <hr/>
-                    <h6 className="mb-3 text-info">Detalle de carrera y sección</h6>
+                    <hr className="line_item"/>
+                    <strong className="mb-3 text-item-title">Detalle de carrera y sección</strong>
                     <div className="row mb-4">
                         <div className="col-md-6">
-                            <strong>CARRERA</strong>
-                            <p>{documentos.nombreCarrera}</p>
+                            <p>Carrera</p>
+                            <strong>{documentos.nombreCarrera}</strong>
                         </div>
                         <div className="col-md-6">
-                            <strong>CICLO</strong>
-                            <p>{documentos.ciclo}</p>
+                            <p>Ciclo</p>
+                            <strong>{documentos.ciclo}</strong>
                         </div>
                         <div className="col-md-6">
-                            <strong>SECCIÓN</strong>
-                            <p>{documentos.seccion}</p>
+                            <p className="mt-2">Sección</p>
+                            <strong>{documentos.seccion}</strong>
                         </div>
                         <div className="col-md-6">
-                            <strong>SEMESTRE</strong>
-                            <p>{documentos.nombreSemestre}</p>
+                            <p className="mt-2">Semestre</p>
+                            <strong>{documentos.nombreSemestre}</strong>
                         </div>
                     </div>
                     <div className="col-12">
