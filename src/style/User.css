@@ -1,0 +1,22 @@
+/* UserInfo.css */
+.card {
+    border-radius: 10px;
+  }
+  
+  .bi-person-circle {
+    font-size: 150px; /* Tamaño de la imagen */
+    color: #6c757d; /* Bootstrap's text-secondary */
+  }
+  
+  .form-control_doc {
+    font-size: 1rem;
+    padding: 0.75rem;
+    border-radius: 5px;
+  }
+  
+  .form-label_doc {
+    font-weight: 600;
+    color: #495057; /* Bootstrap's text color */
+  }
+
+  

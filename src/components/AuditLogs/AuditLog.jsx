@@ -96,7 +96,7 @@ const AuditLogs = () => {
                                     <table className="table table-hover table-bordered">
                                         <thead>
                                             <tr className="rounded-top text-center">
-                                                <th className="tableheadercolor py-1" style={{ width: "80px" }}><b>USUARIO</b></th>
+                                                <th className="tableheadercolor py-1" style={{ width: "80px" }}><b>Usuario</b></th>
                                                 <th className="tableheadercolor py-1" style={{ width: "80px" }}><b>Ciudad de acceso</b></th>
                                                 <th className="tableheadercolor py-1" style={{ width: "80px" }}><b>Dirección IP</b></th>
                                                 <th className="tableheadercolor py-1" style={{ width: "80px" }}><b>Fecha de ingreso</b></th>

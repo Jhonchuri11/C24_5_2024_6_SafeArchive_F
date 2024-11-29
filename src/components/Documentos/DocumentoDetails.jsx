@@ -4,11 +4,20 @@ import api from "../../services/api";
 import toast from "react-hot-toast";
 import Errors from "../Errors";
 import Swal from "sweetalert2";
+import { format } from "date-fns";
+import { es } from 'date-fns/locale';
+import ReactQuill from "react-quill";
+import "react-quill/dist/quill.snow.css";
+import { FaPushed, FaSave } from "react-icons/fa";
 
 
 const DocumentoDetails = () => {
     
     const navigate = useNavigate();
+
+    const formatDate = (date) => {
+        return format(new Date(date), 'dd MMMM yyyy', { locale: es });
+    };
 
     // obtaing id for params
     const { id } = useParams();
@@ -128,11 +137,6 @@ const DocumentoDetails = () => {
         formData.append('resumen', documentos.resumen);
         formData.append('fechaPublicacion', documentos.fechaPublicacion);
         formData.append('asesor', documentos.asesor);
-        formData.append('categoria', documentos.categoriaId);
-        formData.append('carrera', documentos.carreraId);
-        formData.append('ciclo', documentos.ciclo);
-        formData.append('seccion', documentos.seccion);
-        formData.append('semestre', documentos.semestreId);
   
         try {
           setLoading(true)
@@ -158,6 +162,7 @@ const DocumentoDetails = () => {
           console.log('Documento actualizado con éxito:', response.data);
         } catch (error) {
           setError(error.response.data.message);
+          console.log(error);
           Swal.fire({
             title: "Error",
             text: "Ocurrió un error al intentar registrar el documento!",
@@ -217,7 +222,7 @@ const DocumentoDetails = () => {
                             </div>
                             <textarea
                                 type="text"
-                                className="form-control border border-grey-1"
+                                className="form-control input_btn  border border-grey-1"
                                 id="titulo"
                                 name="titulo"
                                 value={documentos.titulo}
@@ -234,7 +239,7 @@ const DocumentoDetails = () => {
                             </div>
                             <textarea
                                 type="text"
-                                className="form-control border border-grey-1"
+                                className="form-control border input_btn  border-grey-1"
                                 id="autores"
                                 name="autores"
                                 value={documentos.autores}
@@ -251,11 +256,12 @@ const DocumentoDetails = () => {
                             </div>
                             <textarea
                                 type="text"
-                                className="form-control border border-grey-1"
+                                className="form-control input_btn  border border-grey-1"
                                 id="resumen"
                                 name="resumen"
                                 value={documentos.resumen}
                                 onChange={(e) => setDocumentos({ ...documentos, resumen: e.target.value })}
+                                rows={5}
                             >
                             </textarea>
                         </div>
@@ -267,11 +273,12 @@ const DocumentoDetails = () => {
                                 <i className="bi bi-calendar2-day"></i>
                             </div>
                             <input
-                                type="Date"
-                                className="form-control border border-grey-1"
+                                readOnly
+                                type="text"
+                                className="form-control input_btn  border border-grey-1"
                                 id="fechaPublicacion"
                                 name="fechaPublicacion"
-                                value={documentos.fechaPublicacion}
+                                value={documentos.fechaPublicacion ? formatDate(documentos.fechaPublicacion) : ""}
                                 onChange={(e) => setDocumentos({ ...documentos, fechaPublicacion: e.target.value })}
                             >
                             </input>
@@ -285,7 +292,7 @@ const DocumentoDetails = () => {
                             </div>
                             <input
                                 type="text"
-                                className="form-control border border-grey-1"
+                                className="form-control input_btn  border border-grey-1"
                                 id="asesor"
                                 name="asesor"
                                 value={documentos.asesor}
@@ -302,24 +309,15 @@ const DocumentoDetails = () => {
                                 <i className="bi bi-bookmark-star"></i>
                             </div>
                             
-                            <select
-                                className="form-control border border-grey-1"
+                            <input
+                            readOnly
+                                className="form-control input_btn  border border-grey-1"
                                 id="categoria"
                                 name="categoria"
-                                value={documentos.categoriaId || ""}
-                                onChange={(e) => 
-                                    setDocumentos({
-                                        ...documentos,
-                                        categoriaId: e.target.value,
-                                    })
-                                }
+                                value={documentos.nombreCategoria}
+                                onChange={(e) => setDocumentos({...documentos, nombreCategoria: e.target.value })}
                             >   
-                                {categories.map((cate) => (
-                                    <option key={cate.id} value={cate.id}>
-                                        {cate.nombreCategoria}
-                                    </option>
-                                ))}
-                            </select>
+                            </input>
                         </div>
                     </div>
                     <div className="col-6">
@@ -328,24 +326,15 @@ const DocumentoDetails = () => {
                             <div className="input-group-text">
                                 <i className="bi bi-chat-square-text-fill"></i>
                             </div>
-                            <select
-                                className="form-control border border-grey-1"
+                            <input
+                                readOnly
+                                className="form-control input_btn  border border-grey-1"
                                 id="categoria"
                                 name="categoria"
-                                value={documentos.carreraId || ""}
-                                onChange={(e) => 
-                                    setDocumentos({
-                                        ...documentos,
-                                        carreraId: e.target.value,
-                                    })
-                                }
+                                value={documentos.nombreCarrera}
+                                onChange={(e) => setDocumentos({...documentos, nombreCarrera: e.target.value, })}
                             >   
-                                {carreras.map((carre) => (
-                                    <option key={carre.id} value={carre.id}>
-                                        {carre.nombreCarrera}
-                                    </option>
-                                ))}
-                            </select>
+                            </input>
                      
                         </div>
                     </div>
@@ -356,8 +345,9 @@ const DocumentoDetails = () => {
                                 <i className="bi bi-chat-square-text-fill"></i>
                             </div>
                             <input
+                                readOnly
                                 type="text"
-                                className="form-control border border-grey-1"
+                                className="form-control input_btn  border border-grey-1"
                                 id="ciclo"
                                 name="ciclo"
                                 value={documentos.ciclo}
@@ -373,11 +363,12 @@ const DocumentoDetails = () => {
                                 <i className="bi bi-chat-square-text-fill"></i>
                             </div>
                             <input
+                                readOnly
                                 type="text"
-                                className="form-control border border-grey-1"
+                                className="form-control input_btn  border border-grey-1"
                                 id="seccion"
                                 name="seccion"
-                                value={documentos.seccion}
+                                value={documentos.seccion || 'Ninguna sección'}
                                 onChange={(e) => setDocumentos({ ...documentos, seccion: e.target.value })}
                             >
                             </input>
@@ -389,36 +380,28 @@ const DocumentoDetails = () => {
                             <div className="input-group-text">
                                 <i className="bi bi-chat-square-text-fill"></i>
                             </div>
-                            <select
-                                className="form-control border border-grey-1"
+                            <input
+                                readOnly
+                                className="form-control input_btn  border border-grey-1"
                                 id="categoria"
                                 name="categoria"
-                                value={documentos.semestreId || ""}
-                                onChange={(e) => 
-                                    setDocumentos({
-                                        ...documentos,
-                                        semestreId: e.target.value,
-                                    })
-                                }
+                                value={documentos.nombreSemestre}
+                                onChange={(e) => setDocumentos({...documentos, nombreSemestre: e.target.value, })}
                             >   
-                                {semestres.map((seme) => (
-                                    <option key={seme.id} value={seme.id}>
-                                        {seme.nombreSemestre}
-                                    </option>
-                                ))}
-                            </select>
+                            </input>
                         </div>
                     </div>
                     
                     <div className="col-12">
                         <button
                             disabled={loading} 
-                            className="btn btn-info px-4 float-end mt-4 me-2"
+                            className="btn btn-info px-4 button_page_filter_register float-end mt-4 me-2"
                         >
-                            { loading ? <span>Loading...</span> : "Guardar documento" }
+                            <FaSave/>
+                            { loading ? <span>Actualizando...</span> : " Guardar documento" }
                         </button>
                         <Link to={'/documentos'} 
-                        className="btn btn-success px-4 float-end mt-4 me-2">
+                        className="btn btn-success button_page_filter_register px-4 float-end mt-4 me-2">
                             Cancelar
                         </Link>
                     </div>

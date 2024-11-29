@@ -35,10 +35,10 @@
 .box_header_1 {
     background-color: #28AECE;
     color: #ffffff;
-    font-family: Quicksand;
+    padding: 1%;
     font-style: normal;
     font-weight: 500;
-    font-size: inherit;
+    font-size: 80%;
     line-height: 19px;
 }
 
@@ -78,26 +78,28 @@
     cursor: pointer;
     transition: all 0.5s;
     box-shadow: 3px 3px 2px rgba(202, 209, 216, 0.75);
-
-    /* Ajustes para centrar y dar tamaño cuadrado */
-    width: 100px; /* Ajusta el tamaño según lo que necesites */
-    height: 100px; /* Hace que el botón sea cuadrado */
+    width: 100px;
+    height: 100px; 
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto; /* Centra el botón */
+    margin: 0 auto;
     text-align: center;
 }
 .s_card_button .card-title {
-    line-height: 1.2 !important;
-    font-size: 14px;
-    font-family: Quicksand;
+    line-height: 1.2;
+    font-size: 80%;
     font-style: normal;
-    font-weight: bold;
+    font-weight: bolder;
     color: #28AECE;
 }
 
-
+.line_item {
+    border: 3px solid #28AECE;
+}
+.text-item-title {
+    color: #28AECE;
+}
 
 .card-body {
     padding: 1.25rem;
@@ -115,14 +117,21 @@
 }
 .table_document {
     text-align: center;
+    font-size: 100%;
+    
 }
-
+.tableheadercolor {
+    font-size: 80%;
+    font-style: normal;
+    line-height: 1.2;
+    font-weight: bolder;
+}
 .row-disabled {
-    background-color: #25ca99;  /* Color de fondo rojo claro */
+    background-color: #e0f71a;  /* Color de fondo rojo claro */
     align-items: center;
     color: rgb(26, 37, 18);  /* Color de texto rojo oscuro */
     opacity: 0.7;  /* Baja opacidad para indicar que está deshabilitado */
-    background:#25ca99;
+    background:#f58a93;
 }
 .row-disabled:hover {
     cursor: not-allowed;  /* Cambiar el cursor para mostrar que no se puede interactuar */

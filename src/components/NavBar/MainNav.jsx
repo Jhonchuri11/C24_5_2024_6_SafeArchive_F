@@ -82,9 +82,9 @@ export default function MainNav() {
                     </div>
                 </div>
             </nav>
-            <div className="py-2 bg-info text-light">
+            <div className="py-2 bg-info-nav text-light">
                 <div className='container'>
-                    <p className="container m-0 text-white">Tesis y proyectos de Tecnología Digital</p>
+                    <p className="container m-0 text-white">Repositorio de Tesis y Proyectos Integradores</p>
                 </div>
             </div>
 

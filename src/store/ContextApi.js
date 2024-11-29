@@ -62,7 +62,7 @@ export const  ContextProvider = ({ children }) => {
                 setCurrentUser(data);
             } catch (error) {
                 console.error("Error fetching current user", error);
-                toast.error("Error fetching current user");
+                toast.error("Token expirado");
             }
         }
     };
