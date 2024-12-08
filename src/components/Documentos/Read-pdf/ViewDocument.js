@@ -56,7 +56,9 @@ const ViewDocument = () => {
         
     }, [docId]);
 
-    if (!pdfUrl) return <div>Cargando...</div>
+    if (!pdfUrl) return <div className="loading-overlay">
+                            <div className="spinner"></div>
+                        </div>
 
     return (
         <div className="container mt-2">
@@ -64,6 +66,9 @@ const ViewDocument = () => {
                 <Worker workerUrl='https://unpkg.com/pdfjs-dist@3.4.120/legacy/build/pdf.worker.js'>
                     <Viewer  fileUrl={pdfUrl} />;
                 </Worker>
+            </div>
+            <div className="mt-3">
+
             </div>
         </div>
     )

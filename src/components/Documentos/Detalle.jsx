@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import doctesis from '../../assets/images/doc_tesis.png';
 import { useNavigate, useParams } from "react-router-dom";
 import api from "../../services/api";
-import toast from "react-hot-toast";
 import Skeleton from "react-loading-skeleton";
 import Errors from "../Errors";
 export default function Detalle() {
@@ -19,54 +18,21 @@ export default function Detalle() {
 
     const [imageLoaded, setImageLoaded] = useState(false);
 
-
-    // utilizamos el endpont para listar un documento por su id
     const fetchDocumentosDetails = useCallback( async () => {
         setLoading(true);
         try {
             const response = await api.get(`/documentos/${documentoId}`);
-            console.log(response.data);
             setDocumento(response.data);
         } catch (err) {
-            console.log(err);
             setError(err?.response?.data?.message);
-            toast.error("Error fetching documentos details");
         } finally {
             setLoading(false);
         }
     }, [documentoId]);
 
-    // funcion para descargar documentor
     const handleDownloadViewDocument = async (docId) => {
         navigate(`/download-view-document/${docId}`);
     }
-
-    const handleDowload = async () => {
-        try 
-        {
-            const response = await api.get(`/documentos/download/pdf?id=${documentoId}`, {
-                responseType: 'blob',
-            });
-
-            console.log(response.headers);
-            console.log(response.data);
-            console.log(response);
-
-            // Creamos una url para el archivo
-            const url = window.URL.createObjectURL( new Blob([response.data], { type: 'application/pdf' }));
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', documento.autores);
-            document.body.appendChild(link);
-            link.click();
-            
-            document.body.removeChild(link);
-        } catch (error) {
-            console.log(error?.response?.data?.message);
-            //toast.error("Error downloading document");
-        }
-    }
-
 
     const handleImageLoad = () => {
         setImageLoaded(true);
@@ -76,10 +42,7 @@ export default function Detalle() {
         fetchDocumentosDetails();
     }, [fetchDocumentosDetails]);
 
-
-
     if (loading) return <p>Cargando los resultados</p>;
-    if (error) return <p>Error: {error}</p>
      if (error) {
         return <Errors message={error} />
     }
@@ -127,6 +90,11 @@ export default function Detalle() {
                     </div>
                     </div>
                 </div>
+                {loading && (
+                    <div className="loading-overlay">
+                        <div className="spinner"></div>
+                    </div>
+                )}
                 <hr/>
             </div>
         </section>

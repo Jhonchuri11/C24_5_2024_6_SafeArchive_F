@@ -16,9 +16,6 @@ import { getFilePlugin } from '@react-pdf-viewer/get-file';
 
 const DownloadView = () => {
 
-    // create plugin instance
-    //const defaultLayoutPluginInstance = defaultLayoutPlugin();
-
     const getFilePluginInstance = getFilePlugin();
     const { DownloadButton } = getFilePluginInstance;
 
@@ -51,7 +48,6 @@ const DownloadView = () => {
     
             } catch (error) {
                 console.error("Error al obtener la URL de previsualización", error);
-                setError(true);
             } finally {
                 setLoading(false);
             }
@@ -67,8 +63,10 @@ const DownloadView = () => {
         
     }, [docId]);
 
-    if (loading) return <div>Cargando...</div>
     if (error) return <div>Hubo un error al cargar el documento.</div>
+    if (!pdfUrl) return <div className="loading-overlay">
+                            <div className="spinner"></div>
+                        </div>
 
     return (
         <div className="container mt-2">
@@ -83,8 +81,9 @@ const DownloadView = () => {
                         plugins={[getFilePluginInstance]}
                         />; 
                     </Worker> 
-                    </div>   
-                </div>
+                </div>   
+            </div>
+            <div className="mt-3"></div>
         </div>
     )
 }

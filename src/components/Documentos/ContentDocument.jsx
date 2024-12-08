@@ -7,7 +7,7 @@ import toast from "react-hot-toast";
 import Errors from "../Errors";
 import { IconButton, Tooltip } from "@mui/material";
 import { MdRemoveRedEye } from "react-icons/md";
-import { FaBan, FaCheck, FaChevronCircleLeft, FaChevronCircleRight,FaEdit, FaFileAlt, FaFileArchive, FaFileUpload, FaSearch, FaTrash } from "react-icons/fa";
+import { FaBan, FaCheck, FaChevronCircleLeft, FaChevronCircleRight,FaEdit, FaFileAlt, FaFileUpload, FaSearch } from "react-icons/fa";
 import Swal from "sweetalert2";
 
 const ContentDocument = () => {
@@ -19,12 +19,9 @@ const ContentDocument = () => {
     const [error, setError] = useState(false);
 
     const [busqueda, setBusqueda] = useState('');
-    const [resultados, setResultados] = useState([]);
 
     // filter frontend
-    const [filteredDocs, setFilteredDocs] = useState([]);  
-    const [titulo, setTitulo] = useState('');  
-    const [autores, setAutores] = useState('');    
+    const [filteredDocs, setFilteredDocs] = useState([]);     
 
     const [carrera, setCarrera] = useState('');             
     const [carrerasUnicas, setCarrerasUnicas] = useState([]); 
@@ -39,7 +36,6 @@ const ContentDocument = () => {
             const response = await api.get("/documentos");
             const documentData = Array.isArray(response.data) ? response.data : [];
             setDocumentos(documentData);
-            console.log(response);
 
             const uniqueCarrer = [...new Set(response.data.map(doc => doc.nombreCarrera))];
             setCarrerasUnicas(uniqueCarrer);
@@ -104,8 +100,8 @@ const ContentDocument = () => {
                     toast.success(`Documento ${confirmMessage} correctamente.`);
 
                 } catch (error) {
-                    console.error("Ocurrió un error al deshabilitar el documento", error);
-                    console.log(error);
+
+                    setError(error.response.data.message);
                     
                     toast.error("No se puede deshabilitar el documento.");
                 }
@@ -317,17 +313,21 @@ const ContentDocument = () => {
                                         </tbody>
                                     </table>
                                 </div>
-                                
                                 {/* AQUI LA PAGINACION */}
+                                {loading && (
+                                    <div className="loading-overlay">
+                                        <div className="spinner"></div>
+                                    </div>
+
+                                )}
                             </div>
                         </div>
 
                     </div>
                 </div>
             </div>
-
         </div>
-    );
+    )
 }
 
 export default ContentDocument;

@@ -19,7 +19,6 @@ const AuditLogs = () => {
                     params: { page: currentPage - 1, limit: logsPerPage },
                 });
                 setLogs(response.data);
-                console.log(response);
             } catch (err) {
                 toast.error("Error fetching auditorias!");
                 setError('Error al cargar los registros de auditoría');

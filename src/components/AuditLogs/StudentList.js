@@ -1,10 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { fetchStudents, changeUserRole } from '../../services/api';
+import api, { fetchStudents, changeUserRole } from '../../services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../style/StudentList.css';
+import RegisterSingleUserModal from './RegistersUsers/RegisterUserModal';
+import RegisterMultipleUsersModal from './RegistersUsers/RegisterUsersListModal';
+import Swal from 'sweetalert2';
+import RegisterUserModal from './RegistersUsers/RegisterUserModal';
+import RegisterUsersListModal from './RegistersUsers/RegisterUsersListModal';
 
 const StudentList = () => {
+
+  const [showSingleModal, setShowSingleModal] = useState(false);
+  const [showMultipleModal, setShowMultipleModal] = useState(false);
+
   const [students, setStudents] = useState([]);
   const [selectedRole, setSelectedRole] = useState({});
   const [loading, setLoading] = useState(true);
@@ -12,6 +21,56 @@ const StudentList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage, setStudentsPerPage] = useState(10);
+
+  const handleRegisterSingleUser = async (usuariosDto) => {
+    try {
+      setLoading(true);
+      const response = await api.post('/admin/register-user', usuariosDto);
+  
+      Swal.fire(
+        "Éxito",
+        "El usuario ha sido registrado correctamente.",
+        "success"
+      ).then(() => {
+        window.location.reload(); // Refresca la página para reflejar los cambios
+      });
+  
+      console.log("Usuario registrado con éxito:", response.data);
+    } catch (err) {
+      Swal.fire(
+        "Error",
+        err.response?.data?.message || "Ocurrió un error al intentar registrar el usuario.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRegisterMultipleUsers = async (usuariosDto) => {
+    try {
+      setLoading(true);
+      const response = await api.post('/admin/register-users', usuariosDto);
+      Swal.fire(
+        "Éxito",
+        "Los usuarios han sido registrados correctamente.",
+        "success"
+      ).then(() => {
+        window.location.reload(); // Refresca la página para reflejar los cambios
+      });
+  
+      console.log("Usuarios registrados con éxito:", response.data);
+    } catch (err) {
+      Swal.fire(
+        "Error",
+        err.response?.data?.message || "Ocurrió un error al intentar registrar los usuarios.",
+        "error"
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+  
 
   useEffect(() => {
     const getStudents = async () => {
@@ -74,10 +133,14 @@ const StudentList = () => {
   return (
     <div className="student-list-container">
       <h1 className="student-list-title">Lista de Usuarios</h1>
+    
+       {/* Modal para registrar un solo usuario */}
+            
+       {/* Modal para registrar una lista de usuarios */}
 
       <ToastContainer
         position="top-right"
-        autoClose={3000}
+        autoClose={1000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
@@ -169,7 +232,29 @@ const StudentList = () => {
           )
         )}
       </div>
+
+
+      <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary">Understood</button>
+      </div>
     </div>
+  </div>
+</div>
+
+    </div>
+
+    
   );
 };
 

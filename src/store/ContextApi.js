@@ -8,7 +8,7 @@ export const  ContextProvider = ({ children }) => {
 
     // find the token in the Localstorage
     const getToken = localStorage.getItem("JWT_TOKEN")
-    ? JSON.stringify(localStorage.getItem("JWT_TOKEN"))
+    ? localStorage.getItem("JWT_TOKEN")
     : null;
 
     // find is the user admin status from the LocalStorage

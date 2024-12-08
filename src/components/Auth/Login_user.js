@@ -6,10 +6,11 @@ import "../../style/Login_user.css";
 
 export default function Login_user() {
 
+    const baseUrl = process.env.REACT_APP_API_URL;
 
-   const gooogleLogin = () => {
-    window.location.href = "http://localhost:8081/oauth2/authorization/google";
-   }
+    const gooogleLogin = () => {
+        window.location.href = `${baseUrl}/oauth2/authorization/google`;
+    }
     
     return (
        <div className="login-page">

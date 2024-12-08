@@ -17,17 +17,12 @@ const UserInfo = () => {
                 <li className="breadcrumb-item" aria-current="page">Mi Perfil</li>
             </ol>
         </nav>
-        
         </div>
-        {/* User Card */}
       <div className="card mx-auto shadow p-4" style={{ maxWidth: "600px", borderRadius: "10px" }}>
         <div className="row align-items-center">
-          {/* User Image */}
           <div className="col-md-4 text-center mb-3 mb-md-0">
             <i className="bi bi-person-circle" style={{ fontSize: "150px", color: "#6c757d" }}></i>
           </div>
-
-          {/* User Inputs */}
           <div className="col-md-8">
             <form>
               <div className="mb-3">
@@ -38,7 +33,7 @@ const UserInfo = () => {
                   id="email"
                   className="form-control form-control_doc input_btn"
                   defaultValue={currentUser?.email || ""}
-                  placeholder="example@email.com"
+                  placeholder="usuario@email.com"
                 />
               </div>
 

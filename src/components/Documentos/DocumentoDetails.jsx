@@ -6,9 +6,8 @@ import Errors from "../Errors";
 import Swal from "sweetalert2";
 import { format } from "date-fns";
 import { es } from 'date-fns/locale';
-import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
-import { FaPushed, FaSave } from "react-icons/fa";
+import { FaSave } from "react-icons/fa";
 
 
 const DocumentoDetails = () => {
@@ -19,34 +18,20 @@ const DocumentoDetails = () => {
         return format(new Date(date), 'dd MMMM yyyy', { locale: es });
     };
 
-    // obtaing id for params
     const { id } = useParams();
     const [documentos, setDocumentos] = useState({});
 
-    // Estados para los datos del formulario
-
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
-
-    // categorias de documentos
-    const [categories, setCategories] = useState([]);
-
-    const [carreras, setCarreras] = useState([]);
-
-    const [semestres, setSemestres] = useState([]);
-
 
     const fectchDocumentosDetails = useCallback(async () => {
         setLoading(true);
         try {
             const response = await api.get("/documentos");
 
-            // primero sacamos el documento que tenga el id
             const foundDocumento = response.data.find((n) => n.id.toString() === id);
 
             setDocumentos(foundDocumento);
-
-            console.log(foundDocumento);
 
         } catch (error) {
             setError(error.response.data.message);
@@ -55,69 +40,6 @@ const DocumentoDetails = () => {
             setLoading(false);
         }
     }, [id]);
-
-    const fetchCategoria = useCallback(async () => {
-        setLoading(true);
-        try {
-          const response = await api.get("/categorias");
-  
-          const categoriaList = Array.isArray (response.data) ? response.data : [];
-  
-          setCategories(categoriaList);;
-  
-          // eliminar
-          console.log(categoriaList);
-          
-        } catch (error) {
-          setError(error.response.data.message);
-          toast.error("Error fetching categories.");
-          console.log("Error fetching categories", error);
-        } finally {
-          setLoading(false);
-        }
-      }, []);
-
-      const fetchCarreras = useCallback(async () => {
-        setLoading(true);
-        try {
-          const response = await api.get("/carreras");
-  
-          const carreraList = Array.isArray (response.data) ? response.data : [];
-  
-          setCarreras(carreraList);;
-  
-          // eliminar
-          console.log(carreraList);
-          
-        } catch (error) {
-          setError(error.response.data.message);
-          toast.error("Error fetching categories.");
-          console.log("Error fetching categories", error);
-        } finally {
-          setLoading(false);
-        }
-      }, []);
-
-      const fetchSemestres = useCallback(async () => {
-        setLoading(true);
-        try {
-          const response = await api.get("/semestres");
-  
-          const semestreList = Array.isArray (response.data) ? response.data : [];
-  
-          setSemestres(semestreList);;
-  
-          // eliminar
-          console.log(semestreList);
-          
-        } catch (error) {
-          setError(error.response.data.message);
-          toast.error("Error fetching categories.");
-          console.log("Error fetching categories", error);
-        } finally {
-          setLoading(false);
-        }
-      }, []);
 
     useEffect(() => {
         if (id) {
@@ -129,8 +51,7 @@ const DocumentoDetails = () => {
     const handleUpdateDocument = async (event) => {
 
         event.preventDefault();
-  
-        // Crear un objeto FormData para enviar los datos
+        
         const formData = new FormData();
         formData.append('titulo', documentos.titulo);
         formData.append('autores', documentos.autores);
@@ -140,7 +61,6 @@ const DocumentoDetails = () => {
   
         try {
           setLoading(true)
-          // enviamos solicitud
           const response = await api.put(`/documentos/updatedrive/${id}`, formData, {
             headers: {
               'Content-Type': 'multipart/form-data',
@@ -156,10 +76,7 @@ const DocumentoDetails = () => {
               navigate("/documentos");
             }
           })
-  
           navigate("/documentos");
-  
-          console.log('Documento actualizado con éxito:', response.data);
         } catch (error) {
           setError(error.response.data.message);
           console.log(error);
@@ -178,12 +95,6 @@ const DocumentoDetails = () => {
         });
         
       };
-
-    useEffect(() => {
-        fetchCategoria();
-        fetchCarreras();
-        fetchSemestres();
-    }, [fetchCategoria, fetchCarreras, fetchSemestres])
     
 
     // if there is an error
@@ -296,8 +207,6 @@ const DocumentoDetails = () => {
                                 id="asesor"
                                 name="asesor"
                                 value={documentos.asesor}
-                                onChange={(e) => setDocumentos({ ...documentos, asesor: e.target.value })}
-                                
                             >
                             </input>
                         </div>
@@ -315,7 +224,6 @@ const DocumentoDetails = () => {
                                 id="categoria"
                                 name="categoria"
                                 value={documentos.nombreCategoria}
-                                onChange={(e) => setDocumentos({...documentos, nombreCategoria: e.target.value })}
                             >   
                             </input>
                         </div>
@@ -332,7 +240,6 @@ const DocumentoDetails = () => {
                                 id="categoria"
                                 name="categoria"
                                 value={documentos.nombreCarrera}
-                                onChange={(e) => setDocumentos({...documentos, nombreCarrera: e.target.value, })}
                             >   
                             </input>
                      
@@ -351,7 +258,6 @@ const DocumentoDetails = () => {
                                 id="ciclo"
                                 name="ciclo"
                                 value={documentos.ciclo}
-                                onChange={(e) => setDocumentos({ ...documentos, ciclo: e.target.value })}
                             >
                             </input>
                         </div>
@@ -369,7 +275,6 @@ const DocumentoDetails = () => {
                                 id="seccion"
                                 name="seccion"
                                 value={documentos.seccion || 'Ninguna sección'}
-                                onChange={(e) => setDocumentos({ ...documentos, seccion: e.target.value })}
                             >
                             </input>
                         </div>
@@ -386,7 +291,6 @@ const DocumentoDetails = () => {
                                 id="categoria"
                                 name="categoria"
                                 value={documentos.nombreSemestre}
-                                onChange={(e) => setDocumentos({...documentos, nombreSemestre: e.target.value, })}
                             >   
                             </input>
                         </div>

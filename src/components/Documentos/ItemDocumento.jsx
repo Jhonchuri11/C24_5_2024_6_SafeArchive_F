@@ -1,14 +1,12 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import api from "../../services/api";
-import toast from "react-hot-toast";
 import Errors from "../Errors";
-import { format, formatDate } from "date-fns";
+import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
 const ItemDocumento = () => {
 
-    // obtaing id for params
     const { id } = useParams();
 
     const formatDate = (date) => {
@@ -17,7 +15,6 @@ const ItemDocumento = () => {
 
     const [documentos, setDocumentos] = useState({});
 
-    // Estados para los datos del formulario
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(false);
 
@@ -26,16 +23,12 @@ const ItemDocumento = () => {
         try {
             const response = await api.get("/documentos");
 
-            // primero sacamos el documento que tenga el id
             const foundDocumento = response.data.find((n) => n.id.toString() === id);
 
             setDocumentos(foundDocumento);
 
-            console.log(foundDocumento);
-
         } catch (error) {
             setError(error.response.data.message);
-            toast.error("Error fetching document details", error);
         } finally {
             setLoading(false);
         }
@@ -142,6 +135,11 @@ const ItemDocumento = () => {
                     </div>
                 </div>
             </div>
+            {loading && (
+                    <div className="loading-overlay">
+                        <div className="spinner"></div>
+                    </div>
+            )}
             <div className="mt-3"/>
         </div>
         

@@ -4,11 +4,11 @@ import React, { useCallback, useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
 import Skeleton from 'react-loading-skeleton';
+import doctesis from '../../assets/images/doc_tesis.png';
 import 'react-loading-skeleton/dist/skeleton.css';
 import DocumentSkeleton from '../Skeleton/DocumentSkeleton';
 import Errors from '../Errors';
 import { FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa';
-
 
 export default function Inicio() {
 
@@ -24,9 +24,9 @@ export default function Inicio() {
     // Definiendo variables para el funcionamiento de muestra de filtros
     const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
+
     // documentos list
     const [documentos, setDocumentos] = useState([]);
-
 
     const [loading, setLoading] = useState(true);
 
@@ -38,7 +38,6 @@ export default function Inicio() {
     // paginacion de documentos
     const [currentPage, setCurrentPage] = useState(0); // Página actual
     const [totalDocuments, setTotalDocuments] = useState(0); // Total de documentos
-
 
     // funcion para manejar el cambio de filtro
     const handleFiltroChange = (index, field, value) => {
@@ -71,11 +70,8 @@ export default function Inicio() {
 
             setDocumentos(documentsData);
 
-            console.log(documentsData);
-
             setLoading(false);
 
-            // total documentos
             setTotalDocuments(parseInt(response.headers['x-total-count'], 10));
 
         } catch (error) {
@@ -116,10 +112,10 @@ export default function Inicio() {
 
         return { searchCriteria: criterios };
     }
-     // Manejo de búsqueda básica con retraso de Skeleton
+
      const handleSearchBasic = async () => {
 
-        setLoading(true); // Activar Skeleton al iniciar la búsqueda
+        setLoading(true); 
 
         setTimeout(async () => {
 
@@ -129,20 +125,16 @@ export default function Inicio() {
                 
                 const response = await api.post(`/documentos/document`, searchCriteria );
 
-                console.log(response);
-
                 setDocumentos(response.data);
 
                 setTotalDocuments(response.data.length);
-
-                //setLoading(false);
 
             } catch (error) {
                 setError(error?.response?.data?.message);
             } finally {
                 setLoading(false);
             }
-        }, 2000); // 5 segundos de retraso para mostrar el Skeleton
+        }, 2000); 
     };
 
     // funcion paginacion
@@ -206,7 +198,6 @@ export default function Inicio() {
         setResumen('');
     };
 
-     // to show and erros
      if (error) {
         return <Errors message={error} />
     }
@@ -331,7 +322,7 @@ export default function Inicio() {
                                         {documento.thumbnail_link ? (
                                             <img
                                                 className="imgdocumento"
-                                                src={documento.thumbnail_link}
+                                                src={documento.thumbnail_link || doctesis}
                                                 alt={`${documento.titulo}`}
                                                 width={"240px"}
                                                 height={"240px"}
