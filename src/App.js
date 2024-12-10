@@ -102,9 +102,7 @@ export default function App() {
            path='/view-document/:docId'
            element={
             <ProtectedRoute>
-              <MainLayout>
                 <ViewDocument/>
-              </MainLayout>
             </ProtectedRoute>
            }/>
            
@@ -112,9 +110,7 @@ export default function App() {
            path='/download-view-document/:docId'
            element={
             <ProtectedRoute>
-              <MainLayout>
                 <DownloadView/>
-              </MainLayout>
             </ProtectedRoute>
            }/>
           

@@ -3,12 +3,12 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import React, { useCallback, useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
 import api from '../../services/api';
-import Skeleton from 'react-loading-skeleton';
 import doctesis from '../../assets/images/doc_tesis.png';
 import 'react-loading-skeleton/dist/skeleton.css';
 import DocumentSkeleton from '../Skeleton/DocumentSkeleton';
 import Errors from '../Errors';
-import { FaChevronCircleLeft, FaChevronCircleRight } from 'react-icons/fa';
+import { FaChevronCircleLeft, FaChevronCircleRight, FaCog } from 'react-icons/fa';
+import { format } from 'date-fns';
 
 export default function Inicio() {
 
@@ -24,6 +24,7 @@ export default function Inicio() {
     // Definiendo variables para el funcionamiento de muestra de filtros
     const [mostrarFiltros, setMostrarFiltros] = useState(false);
 
+    const [limit, setLimit] = useState(10);
 
     // documentos list
     const [documentos, setDocumentos] = useState([]);
@@ -38,6 +39,9 @@ export default function Inicio() {
     // paginacion de documentos
     const [currentPage, setCurrentPage] = useState(0); // Página actual
     const [totalDocuments, setTotalDocuments] = useState(0); // Total de documentos
+
+    // order
+    const [orden, setOrden] = useState('relevancia');
 
     // funcion para manejar el cambio de filtro
     const handleFiltroChange = (index, field, value) => {
@@ -65,12 +69,12 @@ export default function Inicio() {
       
         try {
             setLoading(true);
-            const response = await api.get(`/documentos/all/paginations`, { params: { page, limit }});
+            const response = await api.get(`/documentos/all/paginations`, { 
+                params: { page, limit }
+            });
             const documentsData = Array.isArray(response.data) ? response.data : [];
 
             setDocumentos(documentsData);
-
-            setLoading(false);
 
             setTotalDocuments(parseInt(response.headers['x-total-count'], 10));
 
@@ -140,7 +144,7 @@ export default function Inicio() {
     // funcion paginacion
     const handlePageChange = (pageNumber) => {
         setCurrentPage(pageNumber);
-        fetchDocumentos(pageNumber);
+        fetchDocumentos(pageNumber, limit);
     }
 
     // start andvanc filters
@@ -198,6 +202,42 @@ export default function Inicio() {
         setResumen('');
     };
 
+    const ordenarDocumentos = (documentos, criterio) => {
+        switch (criterio) {
+            case 'titulo_asc':
+                return [...documentos].sort((a, b) => a.titulo.localeCompare(b.titulo));
+            case 'titulo_desc':
+                return [...documentos].sort((a, b) => b.titulo.localeCompare(a.titulo));
+            case 'fecha_asc':
+                return [...documentos].sort((a, b) => a.fecha_publicacion.localeCompare(b.fecha_publicacion));
+            case 'fecha_desc':
+                return [...documentos].sort((a, b) => b.fecha_publicacion.localeCompare(a.fecha_publicacion));
+            case 'relevancia':
+                return documentos;
+            default:
+                return documentos;
+        }
+    };
+
+    const handleOrdenChange = (criterio) => {
+        setOrden(criterio);
+        setCurrentPage(0);
+        fetchDocumentos(0, limit);
+       
+    };
+
+    const handleLimitChange = (newLimit) => {
+        setLimit(newLimit);
+        setCurrentPage(0);
+        fetchDocumentos(currentPage, newLimit);
+    };
+
+    const highlightMatch = (text, keyword) => {
+        if (!keyword) return text;
+        const regex = new RegExp(`(${keyword})`, 'gi');
+        return text.replace(regex, '<strong>$1</strong>');
+    };
+
      if (error) {
         return <Errors message={error} />
     }
@@ -226,7 +266,7 @@ export default function Inicio() {
                     <div className="col-md-8 primero">
                         <div className="input-group mb-3">
                             <input type="text" 
-                            className="form-control controlador input_btn border border-grey-1" placeholder="Ingresar su búsqueda"
+                            className="form-control controlador input_btn border border-grey-1" placeholder="Ingresar su búsqueda por resumen"
                             value={resumen}
                             onChange={handleBusquedaChange}/>
 
@@ -261,6 +301,7 @@ export default function Inicio() {
                                 <option value="TITULO">Título</option>
                                 <option value="AUTORES">Autor</option>
                                 <option value="ASESOR">Asesor</option>
+                                <option value="FECHA_PUBLICACION">Fecha</option>
                             </select>
                         </div>
                         <div className="col-md-3">
@@ -303,19 +344,88 @@ export default function Inicio() {
 
              {/* Resultados de listado para documentos */}
 
-            <div className="container mt-3">
-                <p>
-                    Mostrando items {currentPage * 10 + 1 }-
-                    {Math.min((currentPage + 1 ) * 10, totalDocuments)} de {totalDocuments}
-                </p>
-                <div>
-                
-            </div>
+            <div className="container mt-5">
             <div className="row">
+            <div className='col-6'>
+                <p>
+                    Mostrando items {currentPage * limit + 1 }-
+                    {Math.min((currentPage + 1 ) * limit, totalDocuments)} de {totalDocuments}
+                </p>
+                </div>
+                <div className="col-6">
+                    <div className="d-flex justify-content-end">
+                    <button 
+                    className="btn button_page_filters border border-grey-1"
+                    type="button"
+                    id="dropdownMenuButton" 
+                    data-bs-toggle="dropdown" 
+                    >
+                      <FaCog/>
+                    </button>
+
+                    {/* Contenido del Dropdown */ }
+                    <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                        <li class="dropdown-header">Opciones de clasificación:</li>
+                        <li>
+                            <button className={`dropdown-item ${orden === 'relevancia' ? 'active' : ''}`} 
+                                onClick={() => handleOrdenChange('relevancia')}>
+                                Relevancia
+                            </button>
+                        </li>
+                        <li>
+                            <button className={`dropdown-item ${orden === 'titulo_asc' ? 'active' : ''}`} 
+                                onClick={() => handleOrdenChange('titulo_asc')}>
+                                Título Asc
+                            </button>
+                        </li>
+                        <li>
+                             <button className={`dropdown-item ${orden === 'titulo_desc' ? 'active' : ''}`} 
+                                onClick={() => handleOrdenChange('titulo_desc')}>
+                                Título Desc
+                             </button>
+                        </li>
+                        <li>
+                            <button className={`dropdown-item ${orden === 'fecha_asc' ? 'active' : ''}`} 
+                                onClick={() => handleOrdenChange('fecha_asc')}>
+                                Fecha Asc
+                            </button>
+                        </li>
+                        <li>
+                             <button className={`dropdown-item ${orden === 'fecha_desc' ? 'active' : ''}`} 
+                                onClick={() => handleOrdenChange('fecha_desc')}>
+                                Fecha Desc
+                             </button>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider"/>
+                        </li>
+                        <li class="dropdown-header">Resultados por página:</li>
+                        <li>
+                            <button className={`dropdown-item ${limit === 5 ? 'active' : ''}`} 
+                               onClick={() => handleLimitChange(5)}>
+                                5 
+                            </button>
+                        </li>
+                        <li>
+                            <button className={`dropdown-item ${limit === 10 ? 'active' : ''}`} 
+                               onClick={() => handleLimitChange(10)}>
+                                10 
+                            </button>
+                        </li>
+                        <li>
+                            <button className={`dropdown-item ${limit === 20 ? 'active' : ''}`} 
+                               onClick={() => handleLimitChange(20)}>
+                                20 
+                            </button>
+                        </li>
+                    </ul>
+                    </div>
+
+                </div>
                     {loading ? (
                         Array(10).fill().map((_, index) => <DocumentSkeleton key={index} />)
                     ) : (
-                        documentos.map((documento, index) => (
+                        ordenarDocumentos(documentos, orden).map((documento, index) => (
                             <div className="row" key={index}>
                                 <div className="col-md-3 mt-4">
                                     <Link to={`/detalle/${documento.id}`}>
@@ -328,15 +438,23 @@ export default function Inicio() {
                                                 height={"240px"}
                                             />
                                         ) : (
-                                            <Skeleton width={240} height={340} />
+                                            <img
+                                                className="imgdocumento"
+                                                src={doctesis}
+                                                alt={`${documento.titulo}`}
+                                                width={"240px"}
+                                                height={"240px"}
+                                            />
                                         )}
                                     </Link>
                                 </div>
                                 <div className="col-md-9 mt-4">
-                                    <Link to={`/detalle/${documento.id}`} className='documento'>{documento.titulo}</Link>
-                                    <p>{documento.autores}</p>
-                                    <p className="texto-resumen text-justify">
-                                        {documento.resumen}
+                                    <Link to={`/detalle/${documento.id}`} className='documento_title_inicio'><strong>{documento.titulo}</strong></Link>
+                                    <p>{documento.autores} (Instituto de Educación Superior Privado Tecsup, {format(new Date(documento.fecha_publicacion), 'yyyy-MM-dd')})</p>
+                                    <p className="texto-resumen text-justify"
+                                    dangerouslySetInnerHTML={{
+                                        __html: highlightMatch(documento.resumen, resumen),
+                                    }}>
                                     </p>
                                 </div>
                             </div>
@@ -355,10 +473,12 @@ export default function Inicio() {
                             </button>
                         </li>
 
-                        {Array.from({ length: Math.ceil(totalDocuments / 10 ) }, (_, index ) => (
-                            <li className="page-item" key={index}>
+                        {Array.from({ length: Math.ceil(totalDocuments / limit ) }, (_, index ) => (
+                            <li 
+                            className={`page-item ${index === currentPage ? 'active' : ''}`}
+                            key={index}>
                                 <button 
-                                    class="page-link "
+                                    class="page-link"
                                     onClick={() => handlePageChange(index)}
                                     disabled={index === currentPage}>
                                         { index + 1 }
@@ -370,7 +490,7 @@ export default function Inicio() {
                             <button 
                                 className="page-link" 
                                 onClick={() => handlePageChange(currentPage + 1)}
-                                disabled={(currentPage + 1 ) * 10 >= totalDocuments}>
+                                disabled={(currentPage + 1 ) * limit >= totalDocuments}>
                                     <FaChevronCircleRight/>
                             </button>
                         </li>

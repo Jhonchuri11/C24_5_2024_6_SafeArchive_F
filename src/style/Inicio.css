@@ -19,8 +19,9 @@
     background-color: #f8f9fa; 
     color: #495057;
 }
-.documento {
+.documento_title_inicio {
     text-decoration: none;
+    color: #28AECE;
 }
 .letter-link {
     text-decoration: none;
@@ -45,7 +46,7 @@
 }
 
 .imgdocumento {
-    width: 100%; 
+    width: 80%; 
     height: auto; 
 }
 
@@ -54,9 +55,16 @@
     display: box;
     -webkit-box-orient: vertical;
     box-orient: vertical;
-    -webkit-line-clamp: 3;
-    line-clamp: 3;
+    -webkit-line-clamp: 5;
+    line-clamp: 5;
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: justify;
+}
+
+.page-item.active .page-link {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+    border-color: #007bff;
 }

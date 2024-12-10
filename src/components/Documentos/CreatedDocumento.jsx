@@ -6,6 +6,9 @@ import * as Yup from "yup";
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import Swal from "sweetalert2";
 import { FaSave } from "react-icons/fa";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "bootstrap/dist/js/bootstrap.bundle.min.js";
+import bootstrapBundleMin from "bootstrap/dist/js/bootstrap.bundle.min.js";
 
 
 
@@ -22,6 +25,40 @@ export default function CreatedDocumento() {
     const [carrerasList, setCarrerasList] = useState([]);
 
     const [semestressList, setSemestresList] = useState([]);
+
+    const [newCarrera, setNewCarrera] = useState("");
+
+    const [newSemestre, setNewSemestre] = useState("");
+
+
+    const handleAddCarrera = async () => {
+      try {
+        const response = await api.post("/carreras", { nombreCarrera: newCarrera });
+        setCarrerasList([...carrerasList, response.data]);
+        setNewCarrera("");
+      } catch (error) {
+        // Manejar errores específicos del backend
+        if (error.response && error.response.status === 409) {
+            alert("La carrera ya está registrada.");
+        } else {
+            alert("Error al agregar carrera: " + (error.response?.data || error.message));
+        }
+      }
+    };
+
+    const handleAddSemestre = async () => {
+      try {
+        const response = await api.post("/semestres", { nombreSemestre: newSemestre });
+        setSemestresList([...semestressList, response.data]);
+        setNewSemestre("");
+      } catch (error) {
+        if (error.response && error.response.status === 409) {
+            alert("El semestre ya está registrada.");
+        } else {
+            alert("Error al agregar semestre: " + (error.response?.data || error.message));
+        }
+      }
+    };
 
     const fetchData = useCallback(async (endpoint, setState) => {
 
@@ -107,6 +144,8 @@ export default function CreatedDocumento() {
       });
       
     };
+
+   
 
     return (
         <section className="container mt-4">
@@ -264,6 +303,14 @@ export default function CreatedDocumento() {
               className="form-select input_btn  border border-grey-1"
               id="carrera"
               name="carrera"
+              onChange={(e) => {
+                if (e.target.value === "new") {
+                  const modal = new bootstrapBundleMin.Modal(document.getElementById("carreraModal"));
+                  modal.show();
+                } else {
+                  handleChange(e);
+                }
+              }}
             >
               <option value="">Seleccionar carrera</option>
               {carrerasList.map((carre) => (
@@ -271,6 +318,8 @@ export default function CreatedDocumento() {
                   {carre.nombreCarrera}
                 </option>
               ))}
+
+              <option value="new">Agregar nueva carrera</option>
             </Field>
           </div>
           <ErrorMessage name="carrera" component="div" className="text-danger" />
@@ -333,6 +382,14 @@ export default function CreatedDocumento() {
               className="form-select input_btn  border border-grey-1"
               id="semestre"
               name="semestre"
+              onChange={(e) => {
+                if (e.target.value === "new") {
+                  const modal = new bootstrapBundleMin.Modal(document.getElementById("semestreModal"));
+                  modal.show();
+                } else {
+                  handleChange(e);
+                }
+              }}
             >
               <option value="">Seleccionar semestre</option>
               {semestressList.map((seme) => (
@@ -340,6 +397,7 @@ export default function CreatedDocumento() {
                   {seme.nombreSemestre}
                 </option>
               ))}
+               <option value="new">Agregar nuevo semestre</option>
             </Field>
           </div>
           <ErrorMessage name="semestre" component="div" className="text-danger" />
@@ -380,6 +438,103 @@ export default function CreatedDocumento() {
       </div>
     )}
   </div>
+
+  {/* Modal para agregar carrera */}
+  <div
+  className="modal fade"
+  id="carreraModal"
+  tabIndex="-1"
+  aria-labelledby="carreraModalLabel"
+  aria-hidden="true"
+>
+  <div className="modal-dialog">
+    <div className="modal-content">
+      <div className="modal-header">
+        <h5 className="modal-title" id="carreraModalLabel">Agregar Nueva Carrera</h5>
+        <button
+          type="button"
+          className="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div className="modal-body">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Nombre de la nueva carrera"
+          value={newCarrera}
+          onChange={(e) => setNewCarrera(e.target.value)}
+        />
+      </div>
+      <div className="modal-footer">
+        <button
+          type="button"
+          className="btn btn-secondary"
+          data-bs-dismiss="modal"
+        >
+          Cerrar
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={handleAddCarrera}
+        >
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{/* Modal para agregar semestre */}
+<div
+  className="modal fade"
+  id="semestreModal"
+  tabIndex="-1"
+  aria-labelledby="semestreModalLabel"
+  aria-hidden="true"
+>
+  <div className="modal-dialog">
+    <div className="modal-content">
+      <div className="modal-header">
+        <h5 className="modal-title" id="semestreModalLabel">Agregar Nuevo semestre</h5>
+        <button
+          type="button"
+          className="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div className="modal-body">
+        <input
+          type="text"
+          className="form-control"
+          placeholder="Nombre del nuevo semestre"
+          value={newSemestre}
+          onChange={(e) => setNewSemestre(e.target.value)}
+        />
+      </div>
+      <div className="modal-footer">
+        <button
+          type="button"
+          className="btn btn-secondary"
+          data-bs-dismiss="modal"
+        >
+          Cerrar
+        </button>
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={handleAddSemestre}
+        >
+          Guardar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
   <div className="mt-3"/>
 </section>
 

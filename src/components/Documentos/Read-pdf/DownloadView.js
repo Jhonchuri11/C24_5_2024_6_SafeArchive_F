@@ -66,25 +66,25 @@ const DownloadView = () => {
     if (error) return <div>Hubo un error al cargar el documento.</div>
     if (!pdfUrl) return <div className="loading-overlay">
                             <div className="spinner"></div>
+                            <p>Cargando documento...</p>
                         </div>
 
     return (
-        <div className="container mt-2">
-            <div className="pdf-container">
-                <div className="pdf-header">
-                    <DownloadButton/>
-                </div>
-                <div className="pdf-viewer">
-                    <Worker workerUrl='https://unpkg.com/pdfjs-dist@3.4.120/legacy/build/pdf.worker.js'>
-                        <Viewer 
-                        fileUrl={pdfUrl}
-                        plugins={[getFilePluginInstance]}
-                        />; 
-                    </Worker> 
+
+                <div className="pdf-container" style={{ width: '100%', height: '100vh', position: 'relative' }}>
+                <iframe
+                        src={pdfUrl}
+                        title="Documento"
+                        width="100%"
+                        height="100%"
+                        style={{
+                            border: 'none',
+                            position: 'absolute',
+                            top: 0,
+                            left: 0
+                        }}
+                    ></iframe>
                 </div>   
-            </div>
-            <div className="mt-3"></div>
-        </div>
     )
 }
 

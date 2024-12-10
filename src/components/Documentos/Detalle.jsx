@@ -4,6 +4,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import api from "../../services/api";
 import Skeleton from "react-loading-skeleton";
 import Errors from "../Errors";
+import { FaFile } from "react-icons/fa";
+import { format } from "date-fns";
 export default function Detalle() {
 
     const navigate = useNavigate();
@@ -23,6 +25,7 @@ export default function Detalle() {
         try {
             const response = await api.get(`/documentos/${documentoId}`);
             setDocumento(response.data);
+            console.log(response);
         } catch (err) {
             setError(err?.response?.data?.message);
         } finally {
@@ -61,28 +64,32 @@ export default function Detalle() {
                         {!imageLoaded && <Skeleton width={240} height={340} />}
                         <img 
                         className="imgdocumento" 
-                        src={documento.thumbnailUrl || doctesis} 
+                        src={documento.thumbnail_link || doctesis} 
                         alt={`${documento.titulo}`} 
                         width={"240px"} 
                         height={"240px"}
                         onLoad={handleImageLoad}
                         style={{ display: imageLoaded ? 'block' : 'none' }}/>
-                        
-
-                        <p class="mt-4">Ver y descargar documento</p>
-
-                        <button onClick={() => handleDownloadViewDocument(documento.id)}  className="btn btn-info documento">
-                            Click aquí!</button>
-
-                        <p class="mt-2">Autores</p>
-
-                        <p>{documento.autores}<br/></p>
+                        <div className="mt-4">
+                            Ver documento
+                            <br/>
+                            <FaFile className="me-2"/>
+                            <a type="button" onClick={() => handleDownloadViewDocument(documento.id)}  className="text-decoration-none">
+                            Documento completo aquí!</a>
+                        </div>
+                        <div className="mt-4">
+                            Autores
+                            <p>{documento.autores}</p>
+                        </div>
+                        <div>
+                            Fecha de publicación
+                            <p>{format(new Date(documento.fecha_publicacion), 'yyyy-MM-dd')}</p>
+                        </div>
                     </div>
                     <div class="col-md-9 mt-4">
-                        <h4>RESUMEN</h4>
                     <p class="resumen">{documento.resumen}</p>
                     <div className="mt-2">
-                        <h4>CARRERA</h4>
+                        <h4>Carrera</h4>
                         <p>
                             {documento.nombreCarrera}
                             <br/>
@@ -90,11 +97,6 @@ export default function Detalle() {
                     </div>
                     </div>
                 </div>
-                {loading && (
-                    <div className="loading-overlay">
-                        <div className="spinner"></div>
-                    </div>
-                )}
                 <hr/>
             </div>
         </section>
