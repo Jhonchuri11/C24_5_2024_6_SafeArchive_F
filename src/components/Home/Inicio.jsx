@@ -301,7 +301,7 @@ export default function Inicio() {
                                 <option value="TITULO">Título</option>
                                 <option value="AUTORES">Autor</option>
                                 <option value="ASESOR">Asesor</option>
-                                <option value="FECHA_PUBLICACION">Fecha</option>
+                                <option value="NOMBRE_CARRERA">Carrera</option>
                             </select>
                         </div>
                         <div className="col-md-3">

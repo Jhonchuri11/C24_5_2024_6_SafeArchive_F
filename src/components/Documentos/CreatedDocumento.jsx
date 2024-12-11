@@ -9,6 +9,8 @@ import { FaSave } from "react-icons/fa";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "bootstrap/dist/js/bootstrap.bundle.min.js";
 import bootstrapBundleMin from "bootstrap/dist/js/bootstrap.bundle.min.js";
+import toast from "react-hot-toast";
+import ReactQuill from "react-quill";
 
 
 
@@ -32,30 +34,113 @@ export default function CreatedDocumento() {
 
 
     const handleAddCarrera = async () => {
+      if (!newCarrera.trim()) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Por favor, ingresa el nombre de la carrera.",
+        });
+        return;
+      }
+
       try {
+        
+        const result = await Swal.fire({
+          title: "¿Estás seguro?",
+          text: `Estás por registrar la carrera: "${newCarrera}". ¿Deseas continuar?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Sí, registrar",
+          cancelButtonText: "Cancelar",
+        });
+
+        if (!result.isConfirmed) {
+          return;
+        }
+
         const response = await api.post("/carreras", { nombreCarrera: newCarrera });
+
         setCarrerasList([...carrerasList, response.data]);
+
         setNewCarrera("");
+
+        Swal.fire({
+          icon: "success",
+          title: "Carrera registrada",
+          text: "La carrera se registró correctamente.",
+        });
+
       } catch (error) {
         // Manejar errores específicos del backend
         if (error.response && error.response.status === 409) {
-            alert("La carrera ya está registrada.");
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "La carrera ya está registrada.",
+          });
         } else {
-            alert("Error al agregar carrera: " + (error.response?.data || error.message));
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: `Error al agregar carrera: ${error.response?.data || error.message}`,
+          });
         }
       }
     };
 
     const handleAddSemestre = async () => {
+
+      if (!newSemestre.trim()) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Por favor, ingresa el nombre del semestre.",
+        });
+        return;
+      }
+
       try {
+
+        const result = await Swal.fire({
+          title: "¿Estás seguro?",
+          text: `Estás por registrar la carrera: "${newSemestre}". ¿Deseas continuar?`,
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#3085d6",
+          cancelButtonColor: "#d33",
+          confirmButtonText: "Sí, registrar",
+          cancelButtonText: "Cancelar",
+        });
+
+        if (!result.isConfirmed) {
+          return;
+        }
+
         const response = await api.post("/semestres", { nombreSemestre: newSemestre });
         setSemestresList([...semestressList, response.data]);
         setNewSemestre("");
+        
+        Swal.fire({
+          icon: "success",
+          title: "Semestre registrada",
+          text: "El semestre se registró correctamente.",
+        });
+
       } catch (error) {
         if (error.response && error.response.status === 409) {
-            alert("El semestre ya está registrada.");
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "El semestre ya está registrada.",
+          });
         } else {
-            alert("Error al agregar semestre: " + (error.response?.data || error.message));
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: `Error al agregar semestre: ${error.response?.data || error.message}`,
+          });
         }
       }
     };
@@ -106,11 +191,14 @@ export default function CreatedDocumento() {
 
     // Manejar el envío del formulario
     const handleSubmit = async (values) => {
+
+      const resumenText = values.resumen.replace(/<\/?[^>]+(>|$)/g, ""); 
+
       const cleanedValues = {
         ...values,
         titulo: values.titulo.trim(),
         autores: values.autores.trim(),
-        resumen: values.resumen.trim(),
+        resumen: resumenText.trim(),
         asesor: values.asesor.trim(),
       };
 
@@ -219,19 +307,30 @@ export default function CreatedDocumento() {
 
         <div className="col-12">
           <label>Resumen<span className="text-danger">*</span></label>
-          <div className="input-group">
-            <div className="input-group-text">
-              <i className="bi bi-card-text"></i>
-            </div>
-            
-            <Field
-            as="textarea" 
-              className="form-control input_btn  border border-grey-1"
-              placeholder="Resumen"
-              id="resumen"
-              name="resumen"
-            ></Field>
-          </div>
+
+          <ReactQuill
+          className="h-full "
+          value={values.resumen}
+          onChange={(content) => setFieldValue('resumen', content)}
+          modules={{
+            toolbar: [
+              [
+                {
+                  header: [1, 2, 3, 4, 5, 6],
+                },
+              ],
+              [{ size: [] }],
+              ["bold", "italic", "underline", "strike", "blockquote"],
+              [
+                { list: "ordered" },
+                { list: "bullet" },
+                { indent: "-1" },
+                { indent: "+1" },
+              ],
+              ["clean"],
+            ],
+          }}/>
+          
           <ErrorMessage name="resumen" component="div" className="text-danger"/>
         </div>
 
@@ -447,13 +546,13 @@ export default function CreatedDocumento() {
   aria-labelledby="carreraModalLabel"
   aria-hidden="true"
 >
-  <div className="modal-dialog">
-    <div className="modal-content">
-      <div className="modal-header">
-        <h5 className="modal-title" id="carreraModalLabel">Agregar Nueva Carrera</h5>
+  <div className="modal-dialog shadow rounded">
+    <div className="modal-content shadow rounded">
+      <div className="modal-header shadow rounded">
+        <h5 className="modal-title" id="carreraModalLabel">Agregar nueva carrera</h5>
         <button
           type="button"
-          className="btn-close"
+          className="btn-close shadow rounded"
           data-bs-dismiss="modal"
           aria-label="Close"
         ></button>
@@ -461,8 +560,9 @@ export default function CreatedDocumento() {
       <div className="modal-body">
         <input
           type="text"
-          className="form-control"
-          placeholder="Nombre de la nueva carrera"
+          className="form-control input_btn  border border-grey-1"
+          placeholder="Ej. Diseño y Desarrollo de Software"
+          required
           value={newCarrera}
           onChange={(e) => setNewCarrera(e.target.value)}
         />
@@ -477,7 +577,7 @@ export default function CreatedDocumento() {
         </button>
         <button
           type="button"
-          className="btn btn-primary"
+          className="btn btn-info"
           onClick={handleAddCarrera}
         >
           Guardar
@@ -495,13 +595,13 @@ export default function CreatedDocumento() {
   aria-labelledby="semestreModalLabel"
   aria-hidden="true"
 >
-  <div className="modal-dialog">
-    <div className="modal-content">
-      <div className="modal-header">
-        <h5 className="modal-title" id="semestreModalLabel">Agregar Nuevo semestre</h5>
+  <div className="modal-dialog shadow rounded">
+    <div className="modal-content shadow rounded">
+      <div className="modal-header shadow rounded">
+        <h5 className="modal-title" id="semestreModalLabel">Agregar nuevo semestre</h5>
         <button
           type="button"
-          className="btn-close"
+          className="btn-close shadow rounded"
           data-bs-dismiss="modal"
           aria-label="Close"
         ></button>
@@ -509,8 +609,9 @@ export default function CreatedDocumento() {
       <div className="modal-body">
         <input
           type="text"
-          className="form-control"
-          placeholder="Nombre del nuevo semestre"
+          className="form-control input_btn  border border-grey-1"
+          required
+          placeholder="Ej. 2024-II"
           value={newSemestre}
           onChange={(e) => setNewSemestre(e.target.value)}
         />
@@ -525,7 +626,7 @@ export default function CreatedDocumento() {
         </button>
         <button
           type="button"
-          className="btn btn-primary"
+          className="btn btn-info"
           onClick={handleAddSemestre}
         >
           Guardar

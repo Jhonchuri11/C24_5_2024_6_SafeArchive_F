@@ -3,16 +3,9 @@ import api, { fetchStudents, changeUserRole } from '../../services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import '../../style/StudentList.css';
-import RegisterSingleUserModal from './RegistersUsers/RegisterUserModal';
-import RegisterMultipleUsersModal from './RegistersUsers/RegisterUsersListModal';
 import Swal from 'sweetalert2';
-import RegisterUserModal from './RegistersUsers/RegisterUserModal';
-import RegisterUsersListModal from './RegistersUsers/RegisterUsersListModal';
 
 const StudentList = () => {
-
-  const [showSingleModal, setShowSingleModal] = useState(false);
-  const [showMultipleModal, setShowMultipleModal] = useState(false);
 
   const [students, setStudents] = useState([]);
   const [selectedRole, setSelectedRole] = useState({});
@@ -21,55 +14,34 @@ const StudentList = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [studentsPerPage, setStudentsPerPage] = useState(10);
+  const [roles, setRoles] = useState([]);
 
-  const handleRegisterSingleUser = async (usuariosDto) => {
+  const [correo, setCorreo] = useState('');
+  const [roleId, setRoleId] = useState('');
+
+  const handleSubmit = async () => {
+    if (!correo || !roleId) {
+      toast.error("Por favor, completa todos los campos.");
+      return;
+    }
+
     try {
       setLoading(true);
-      const response = await api.post('/admin/register-user', usuariosDto);
-  
+
+      const response = await api.post("/admin/register", { correoCorporativo: correo, roleId: roleId });
+
       Swal.fire(
         "Éxito",
         "El usuario ha sido registrado correctamente.",
         "success"
-      ).then(() => {
-        window.location.reload(); // Refresca la página para reflejar los cambios
-      });
-  
-      console.log("Usuario registrado con éxito:", response.data);
-    } catch (err) {
-      Swal.fire(
-        "Error",
-        err.response?.data?.message || "Ocurrió un error al intentar registrar el usuario.",
-        "error"
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+      )
 
-  const handleRegisterMultipleUsers = async (usuariosDto) => {
-    try {
-      setLoading(true);
-      const response = await api.post('/admin/register-users', usuariosDto);
-      Swal.fire(
-        "Éxito",
-        "Los usuarios han sido registrados correctamente.",
-        "success"
-      ).then(() => {
-        window.location.reload(); // Refresca la página para reflejar los cambios
-      });
-  
-      console.log("Usuarios registrados con éxito:", response.data);
-    } catch (err) {
-      Swal.fire(
-        "Error",
-        err.response?.data?.message || "Ocurrió un error al intentar registrar los usuarios.",
-        "error"
-      );
+    } catch (error) {
+      toast.error("Hubo un error al registrar el usuario.");
     } finally {
       setLoading(false);
     }
-  };
+  }
   
 
   useEffect(() => {
@@ -77,6 +49,7 @@ const StudentList = () => {
       try {
         const data = await fetchStudents();
         setStudents(data);
+        console.log(data);
       } catch (error) {
         setError(error);
       } finally {
@@ -87,22 +60,48 @@ const StudentList = () => {
     getStudents();
   }, []);
 
+  useEffect(() => {
+    const fetchRoles = async () => {
+      try {
+        const response = await api.get("/admin/roles")
+        setRoles(response.data);
+      } catch (error) {
+        console.error("Error al obtener los roles:", error);
+      }
+    };
+
+    fetchRoles();
+  }, []);
+
+
   const handleChangeRole = async (userId) => {
-    const newRole = selectedRole[userId];
-    if (!newRole) {
+    const selectedRoleId = selectedRole[userId];
+    if (!selectedRoleId) {
       toast.error('Por favor, selecciona un rol primero.');
       return;
     }
 
     try {
       // Llamada al servicio para cambiar el rol
-      await changeUserRole(userId, { nombreRol: newRole });
-      toast.success(`Rol cambiado a ${newRole}`);
+      const response = await api.put("/admin/update-role", { 
+        userId: userId,
+        roleId: selectedRoleId
+      });
+
+      console.log(response.data);
+
+      const updatedUser = response.data;
+
+      toast.success("Rol actualizado exitosamente");
 
       // Actualizar el estado local para reflejar el cambio
       setStudents((prevStudents) =>
         prevStudents.map((student) =>
-          student.id === userId ? { ...student, role_nombre: newRole } : student
+          student.id === userId 
+            ? { ...student, 
+              roleId: selectedRoleId, 
+              role_nombre: updatedUser.role_nombre }
+            : student
         )
       );
 
@@ -196,9 +195,11 @@ const StudentList = () => {
                   }
                 >
                   <option value="">Seleccionar rol</option>
-                  <option value="administrador">Administrador</option>
-                  <option value="asesor">Asesor</option>
-                  <option value="estudiante">Estudiante</option>
+                  {roles.map((role) => (
+                    <option key={role.roleId} value={role.roleId}>
+                      {role.nombreRol}
+                    </option>
+                  ))}
                 </select>
               </td>
               <td>
@@ -209,7 +210,11 @@ const StudentList = () => {
                   Cambiar rol
                 </button>
               </td>
-              <td>{student.role_nombre}</td>
+              <td>
+              {
+                 student.role_nombre
+              }
+              </td>
             </tr>
           ))}
         </tbody>
@@ -233,20 +238,64 @@ const StudentList = () => {
         )}
       </div>
 
+      {/* Modal para agregar carrera */}
+  <div
+  className="modal fade"
+  id="usuarioModal"
+  tabIndex="-1"
+  aria-labelledby="usuarioModalLabel"
+  aria-hidden="true"
+>
+  <div className="modal-dialog shadow rounded">
+    <div className="modal-content shadow rounded">
+      <div className="modal-header shadow rounded">
+        <h5 className="modal-title" id="usuarioModalLabel">Agregar nuevo usuario</h5>
+        <button
+          type="button"
+          className="btn-close shadow rounded"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div className="modal-body">
+        <input
+          type="email"
+          className="form-control input_btn  border border-grey-1"
+          placeholder="Correo electrónico."
+          value={correo}
+          onChange={(e) => setCorreo(e.target.value)}
+          required
+        />
 
-      <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="staticBackdropLabel">Modal title</h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <select
+        className="form-control mt-2"
+        value={roleId}
+        onChange={(e) => setRoleId(e.target.value)}
+        >
+          <option value="">Seleccionar rol</option>
+          {roles.map((role) => (
+            <option key={role.roleId}  value={role.roleId}>
+              {role.nombreRol}
+            </option>
+          ))}
+        </select>
+
       </div>
-      <div class="modal-body">
-        ...
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Understood</button>
+      <div className="modal-footer">
+        <button
+          type="button"
+          className="btn btn-secondary"
+          data-bs-dismiss="modal"
+        >
+          Cerrar
+        </button>
+        <button
+          type="button"
+          className="btn btn-info"
+          onClick={handleSubmit}
+        >
+          { loading? "Registrando..." : "Guardar"}
+        </button>
       </div>
     </div>
   </div>
